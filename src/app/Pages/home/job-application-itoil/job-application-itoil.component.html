@@ -1,0 +1,219 @@
+<section class="bg-blue">
+  <div class="container">
+    <div class="row">
+      <div class="add-a-job-box">
+        <div class="d-flex justify-content-center align-items-center">
+          <div class="switch">
+            <input id="language-toggle" class="check-toggle check-toggle-round-flat" type="checkbox" [(ngModel)]="language" (change)="onLanguageChange()">
+            <label for="language-toggle"></label>
+            <span class="on">EN</span>
+            <span class="off">HN</span>
+          </div>
+        </div>
+        <h4 class="text-center">Apply For {{ position }}</h4><hr />
+
+        <form [formGroup]="jobApplicationForm" (ngSubmit)="onSubmit()">
+          <div class="mb-3 row">
+            <label for="inputName" id="labelName" class="col-sm-2 col-form-label">{{labels.labelName}}<span class="text-danger">*</span></label>
+            <div class="col-sm-10">
+              <input type="text" formControlName="name" class="form-control" placeholder="Enter your name" required>
+              <span class="text-danger" *ngIf="f['name'].invalid && f['name'].touched">Name is required</span>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="datepicker" id="labelDOB" class="col-sm-2 col-form-label">{{labels.labelDOB}}<span class="text-danger">*</span></label>
+            <div class="col-sm-10">
+              <div class="input-group" style="display: flex">
+                <input type="text" style="width:auto"
+                       class="form-control"
+                       id="datepicker"
+                       formControlName="dateOfBirth"
+                       name="dateOfBirth"
+                       placeholder="dd/mm/yyyy"
+                       required />
+                <span class="input-group-text">
+                  <span class="material-icons" style="font-size: 17px;">calendar_today</span>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="inputGender" id="labelGender" class="col-sm-2 col-form-label">{{labels.labelGender}}<span class="text-danger">*</span></label>
+            <div class="col-sm-10">
+              <select formControlName="gender" class="form-select" required>
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="inputMaritalStatus" id="labelMaritalStatus" class="col-sm-2 col-form-label">
+              {{labels.labelMaritalStatus}} <span class="text-danger">*</span>
+            </label>
+            <div class="col-sm-10">
+              <select formControlName="maritalStatus" class="form-select" required>
+                <option value="">Select Marital Status</option>
+                <option value="Single">Single</option>
+                <option value="Married">Married</option>
+              </select>
+              <div *ngIf="f['maritalStatus'].invalid && f['maritalStatus'].touched" class="text-danger">
+                Marital status is required.
+              </div>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="inputEmail" id="labelEmail" class="col-sm-2 col-form-label">{{labels.labelEmail}}<span class="text-danger">*</span></label>
+            <div class="col-sm-10">
+              <input type="email" formControlName="emailAddress" class="form-control" placeholder="Enter your email address" required>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="inputMobileNo" id="labelMobileNo" class="col-sm-2 col-form-label">
+              {{labels.labelMobileNo}} <span class="text-danger">*</span>
+            </label>
+            <div class="col-sm-10">
+              <input type="tel" class="form-control" id="inputMobileNo" formControlName="mobileNo" placeholder="Enter your mobile number"/>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="inputPermanentAddress" id="labelPermanentAddress" class="col-sm-2 col-form-label">{{labels.labelPermanentAddress}}<span class="text-danger">*</span></label>
+            <div class="col-sm-10">
+              <textarea formControlName="permanentAddress" class="form-control" placeholder="Enter your permanent address" required></textarea>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="inputPermanentPincode" id="labelPincode" class="col-sm-2 col-form-label">{{labels.labelPincode}}<span class="text-danger">*</span></label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="inputPermanentPincode" formControlName="PinCode" placeholder="Enter pincode" maxlength="6" minlength="6" pattern="[0-9]{6}" required>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="inputPermanentState" class="col-sm-2 col-form-label" id="labelState">{{labels.labelState}}<span class="text-danger">*</span></label>
+            <div class="col-sm-10">
+              <select class="form-select" id="inputPermanentState" formControlName="stateId" (change)="onStateChange($event, 'permanent')" required>
+                <option value="" disabled>Select State</option>
+                <option *ngFor="let state of states" [value]="state.id">{{ state.name }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="inputPermanentDistrict" class="col-sm-2 col-form-label" id="labelDistrict">{{labels.labelDistrict}}<span class="text-danger">*</span></label>
+            <div class="col-sm-10">
+              <select class="form-select" id="inputPermanentDistrict" formControlName="districtId" required>
+                <option value="0" selected disabled>Select District</option>
+                <option *ngFor="let district of districtsForState" [value]="district.id">{{ district.name }}</option>
+              </select>
+            </div>
+          </div>
+          <h4 class="text-center">{{labels.labelExperience}}</h4>
+        <hr />
+          <div formArrayName="experiences">
+            <div
+              *ngFor="let experience of experiences.controls; let i = index"
+              [formGroupName]="i"
+              class="experience-tab"
+            >
+              <div class="mb-3 row">
+                <label for="company" class="col-sm-2 col-form-label">{{labels.labelCompany}}<span class="text-danger">*</span></label>
+                <div class="col-sm-10">
+                  <input type="text" formControlName="company" class="form-control" placeholder="Company Name" />
+                </div>
+              </div>
+              <div class="mb-3 row">
+                <label for="position" class="col-sm-2 col-form-label">{{labels.labelPosition}}<span class="text-danger">*</span></label>
+                <div class="col-sm-10">
+                  <input type="text" formControlName="position" class="form-control" placeholder="Job Position" />
+                </div>
+              </div>
+              <div class="mb-3 row">
+                <label for="datepicker1" id="labelFromDate" class="col-sm-2 col-form-label">{{labels.labelFromDate}}<span class="text-danger">*</span></label>
+                <div class="col-sm-10">
+                  <div class="input-group" style="display: flex">
+                    <input type="text" style="width:auto"
+                           class="form-control"
+                           id="datepicker1"
+                           formControlName="fromDate"
+                           name="fromDate"
+                           placeholder="dd/mm/yyyy"
+                           required />
+                    <span class="input-group-text">
+                      <!-- <i class="entypo-calendar"></i> -->
+                      <span class="material-icons" style="font-size: 17px;">calendar_today</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="mb-3 row">
+                <label for="datepicker2" id="labelToDate" class="col-sm-2 col-form-label">{{labels.labelToDate}}<span class="text-danger">*</span></label>
+                <div class="col-sm-10">
+                  <div class="input-group" style="display: flex">
+                    <input type="text" style="width:auto"
+                           class="form-control"
+                           id="datepicker2"
+                           formControlName="toDate"
+                           name="toDate"
+                           placeholder="dd/mm/yyyy"
+                           required />
+                    <span class="input-group-text">
+                      <!-- <i class="entypo-calendar"></i> -->
+                      <span class="material-icons" style="font-size: 17px;">calendar_today</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="mb-3 row">
+                <label for="inputHodName" id="labelHodName" class="col-sm-2 col-form-label">{{labels.labelHodName}}<span class="text-danger">*</span></label>
+                <div class="col-sm-10">
+                  <input type="text" formControlName="hodName" class="form-control" placeholder="Enter HOD name" required>
+                  <!-- <span class="text-danger" *ngIf="f['hodName'].invalid && f['hodName'].touched">Name is required</span> -->
+                </div>
+              </div>
+              <div class="mb-3 row">
+                <label for="inputHodEmail" id="labelHodEmail" class="col-sm-2 col-form-label">{{labels.labelHodEmail}}<span class="text-danger">*</span></label>
+                <div class="col-sm-10">
+                  <input type="email" formControlName="hodemailAddress" class="form-control" placeholder="Enter HOD email address" required>
+                </div>
+              </div>
+              <div class="mb-3 row">
+                <label for="inputHodMobileNo" id="labelHodMobileNo" class="col-sm-2 col-form-label">
+                  {{labels.labelHodMobileNo}} <span class="text-danger">*</span>
+                </label>
+                <div class="col-sm-10">
+                  <input type="tel" class="form-control" id="inputHodMobileNo" formControlName="hodmobileNo" placeholder="Enter HOD mobile number"/>
+                </div>
+              </div>
+              <div class="text-end">
+                <div class="d-inline-block me-2">
+                <a type="button" (click)="addTab(i)" *ngIf="i === experiences.length - 1">
+                  <span class="material-icons" style="font-size: 17px;">add_circle</span>
+                </a>
+              </div>
+              <div class="d-inline-block">
+                <a *ngIf="i > 0" type="button" (click)="removeTab(i)">
+                  <span class="material-icons" style="font-size: 17px;">delete</span>
+                </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <hr />
+          <div class="mb-3 row" style="margin-top: 1rem;">
+            <label for="inputResume" class="col-sm-2 col-form-label">{{ labels.labelResume }} <span class="text-danger" *ngIf="position === 'Superviser'">*</span></label>
+            <div class="col-sm-10">
+              <input type="file" class="form-control" [formControlName]="'resumeFile'" accept=".pdf,.jpg,.jpeg,.png" (change)="onFileChange($event, 'resumeFile')">
+              <div *ngIf="f['resumeFile'].invalid && f['resumeFile'].touched" class="text-danger">
+                This file input is required.
+              </div>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <div class="col-sm-12 text-center">
+              <button type="submit" [disabled]="jobApplicationForm.invalid" class="submit_btn">Submit</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>

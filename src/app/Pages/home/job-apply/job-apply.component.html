@@ -1,0 +1,49 @@
+<section class="bg-blue">
+  <div class="container">
+    <div class="row">
+      <div class="add-a-job-box">
+        <h2 class="text-center">Current Openings</h2><hr />
+        <div class="job-category-selection row" style="font-weight:bold">
+          <label class="col-sm-3" *ngFor="let item of GroupDivisionList">
+            <input type="radio" name="jobCategory" [value]="item.divisionId" (click)="showOptions(item.divisionId)"> {{ item.name }}
+          </label>
+        </div>
+        <div id="photoBillingOptions" class="category-options mb-3 row" *ngIf="designationShow">
+          <div class="col-sm-12">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Position</th>
+                  <th>Location</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="designationTableBody">
+                <ng-container *ngFor="let designation of DesignationList">
+                  <tr>
+                    <td>{{ designation.designationName }}</td>
+                    <td>
+                      <select class="form-control" [(ngModel)]="designation.selectedLocation">
+                        <ng-container *ngFor="let item of LocationList">
+                          <option [value]="item.locationId">
+                            {{ item.location }}
+                          </option>
+                        </ng-container>
+                      </select>
+                    </td>
+                    <td style="text-align:end">
+                      <button class="submit_btn"
+                              (click)="redirectToSendOTP(designation.designationId, designation.designationName, designation.selectedLocation)">
+                        Apply
+                      </button>
+                    </td>
+                  </tr>
+                </ng-container>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

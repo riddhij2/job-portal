@@ -2,19 +2,20 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink, RouterModule } from '@angular/router';
 import { AdminComponent } from '../admin.component';
-import { CommonModule, NgFor, NgIf } from '@angular/common';
+import { CommonModule, DatePipe, NgFor, NgIf } from '@angular/common';
 import { Bank, District, LanguageLabels, State, SubDivision } from '../../../Models/JobApplication/language-labels';
 import { JobApplicationService } from '../../../Services/JobApplication/job-application.service';
 import { Applicationlist, ApplicationlistRequest } from '../../../Models/ApplicationList/applicationlist-request';
 import { ApplicantListService } from '../../../Services/ApplicantList/applicant-list.service';
 import { SafeUrlPipe } from '../../../safe-url.pipe';
 import { DomSanitizer, SafeResourceUrl, SafeUrl } from '@angular/platform-browser';
+
 declare var Swal: any;
 
 @Component({
   selector: 'app-verify-employee',
   standalone: true,
-  imports: [NgFor, ReactiveFormsModule,CommonModule, NgIf, RouterModule, RouterLink,  AdminComponent, FormsModule, SafeUrlPipe],
+  imports: [NgFor, ReactiveFormsModule, CommonModule, NgIf, RouterModule, RouterLink, AdminComponent, FormsModule, SafeUrlPipe, DatePipe],
   templateUrl: './verify-employee.component.html',
   styleUrl: './verify-employee.component.css'
 })
@@ -25,7 +26,6 @@ export class VerifyEmployeeComponent {
   applicantReq = new Applicationlist;
   verifyEmployeeForm: FormGroup;
   selectedBankName: string = '';
-  // resumepath = 'https://jobs.datagroup.in//Documents/Vivek%20kumar%20updated%20Resume.pdf';
   safeResumeUrl!: SafeResourceUrl;
   safeQualificationUrl!: SafeResourceUrl;
   safepassportPhotopathUrl!: SafeResourceUrl;
@@ -35,10 +35,7 @@ export class VerifyEmployeeComponent {
   isVerificationTriggered: boolean = false;
 
   constructor(private sanitizer: DomSanitizer, private jobappservice: JobApplicationService, private applicantservice: ApplicantListService, private fb: FormBuilder){
-    // this.resumepath = this.sanitizer.bypassSecurityTrustResourceUrl(
-    //   'https://jobs.datagroup.in//Documents/Vivek%20kumar%20updated%20Resume.pdf'
-    // );
-    this.verifyEmployeeForm = this.fb.group({
+   this.verifyEmployeeForm = this.fb.group({
       bankId: [0],  
       bankAccountNo: [""],
       panNo: [""],
@@ -118,8 +115,6 @@ export class VerifyEmployeeComponent {
       });
     this.isVerificationTriggered = false;
   }
-
-// Check if the file is an image
 isImage(filePath: string): boolean {
   const ext = filePath.split('.').pop()?.toLowerCase();
   return ext === 'jpg' || ext === 'jpeg' || ext === 'png';
@@ -165,7 +160,10 @@ isImage(filePath: string): boolean {
       }
     });
   }
-
+  getFormattedAge(): string {
+    const [years, months] = this.applicantData.age.split(':').map(Number);
+    return `${years} years and ${months} months`;
+  }
   onVerify() {
     this.applicantData.adharNo = this.applicantReq.adharNo;
     this.applicantData.panNo = this.applicantReq.panNo;

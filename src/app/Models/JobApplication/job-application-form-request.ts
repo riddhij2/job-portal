@@ -35,3 +35,37 @@ export class JobApplicationFormRequest {
   'esiNo': string;
   'fatherMobileNo': string;
 }
+
+export class JobApplicationFormRequestIO {
+  'FacebookId': string;
+  'gender': string;
+  'PinCode': string;
+  'mobileNo': string;
+  'maritalStatus': string;
+  'permanentAddress': string;
+  'districtId': string;
+  'LinkdinId': string;
+  'name': string;
+  'stateId': string;
+  'InstagramId': string;
+  'TwiterId': string;
+  'KeySkills': string;
+  'emailAddress': string;
+  'dateOfBirth': string;
+  'ExpDtl': Experience[];
+}
+
+export class Experience {
+  'companyName': string;
+  'joiningDate': string;
+  'relievingDate': string;
+  'hodName': string;
+  'mobileNo': string;
+  'emailAddress': string;
+  'position': string;
+}
+export class Resume {
+  'resumeFile': File;
+  'mobileNo': string;
+}
+

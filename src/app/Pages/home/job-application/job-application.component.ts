@@ -23,7 +23,7 @@ declare var $: any;
 })
 export class JobApplicationComponent {
   jobApplicationForm: FormGroup = new FormGroup({});
-  position: string = 'Software Developer';
+  position: string = '';
   labels = new LanguageLabels();
   states: State[] = [];
   districtsForState: District[] = [];
@@ -43,6 +43,7 @@ export class JobApplicationComponent {
 
     this.MobileNo = JSON.parse(sessionStorage.getItem('MobileNo') || '')
     this.ZoneId = Number(JSON.parse(sessionStorage.getItem('zoneId') || '0'));
+    this.position = JSON.parse(sessionStorage.getItem('groupName') || '')
     this.jobApplicationForm = this.fb.group({
       revenueId: ['', Validators.required],
       name: ['', Validators.required],
@@ -153,7 +154,14 @@ export class JobApplicationComponent {
       this.jobappservice.submitApplication(this.applicationData).subscribe(
         (result: any) => {
           if (result.status == 200) {
-            this.router.navigate([''])
+            Swal.fire({
+              title: 'Success!',
+              text: 'Your application has been submitted successfully.',
+              icon: 'success',
+              confirmButtonText: 'OK'
+            }).then(() => {
+              this.router.navigate(['']);
+            });
           }
         },
         (error: any) => {

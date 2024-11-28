@@ -39,6 +39,7 @@
   'labelCompany'?: string;
   'labelPosition'?: string;
   'labelExperience'?: string;
+  'labelKeySkills'?: string;
 }
 
 export class DesignationItem {

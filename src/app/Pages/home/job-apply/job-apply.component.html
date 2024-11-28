@@ -4,8 +4,8 @@
       <div class="add-a-job-box">
         <h2 class="text-center">Current Openings</h2><hr />
         <div class="job-category-selection row" style="font-weight:bold">
-          <label class="col-sm-3" *ngFor="let item of GroupDivisionList">
-            <input type="radio" name="jobCategory" [value]="item.divisionId" (click)="showOptions(item.divisionId)"> {{ item.name }}
+          <label class="col-lg-3 p-0 text-center" *ngFor="let item of GroupDivisionList">
+            <input type="radio" name="jobCategory" [value]="item.divisionId" (click)="showOptions(item.divisionId, item.name)"> {{ item.name }}
           </label>
         </div>
         <div id="photoBillingOptions" class="category-options mb-3 row" *ngIf="designationShow">
@@ -43,6 +43,34 @@
             </table>
           </div>
         </div>
+        <section class="job-vacancy-list bg-light py-4" *ngIf="ITOilShow" style="background-color: white !important;">
+          <div class="container">
+            <div class="row">
+              <div class="col-md-6 col-lg-12 mb-4" *ngFor="let job of jobPostings">
+                <div class="card shadow-sm">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-md-6"><h6 class="card-title">{{ job.jobName }}</h6></div>
+                      <div class="col-md-6 text-end">
+                        <button class="submit_btn" (click)="redirectToSendOTPIO(job.positionId, job.jobName)">
+                          Apply
+                        </button>
+                      </div>
+                    </div>
+                    <p class="card-text row">
+                      <span class="col-sm-6"><strong><i class="entypo-location"></i></strong> {{ job.location }}</span>
+                      <span class="col-sm-6"><strong><i class="entypo-bag"></i></strong> {{ job.experienceFrom }} - {{ job.experienceTo }} years</span><br />
+                      <span><strong><i class="entypo-key"></i></strong> {{ job.keySkills }}</span><br />
+                      <span><strong><i class="entypo-book-open"></i></strong> {{ job.jobDescription }}</span><br />
+                    </p>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
       </div>
     </div>
   </div>

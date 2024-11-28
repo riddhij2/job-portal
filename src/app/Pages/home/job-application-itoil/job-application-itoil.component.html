@@ -32,6 +32,7 @@
                        placeholder="dd/mm/yyyy"
                        required />
                 <span class="input-group-text">
+                  <!-- <i class="entypo-calendar"></i> -->
                   <span class="material-icons" style="font-size: 17px;">calendar_today</span>
                 </span>
               </div>
@@ -66,6 +67,7 @@
             <label for="inputEmail" id="labelEmail" class="col-sm-2 col-form-label">{{labels.labelEmail}}<span class="text-danger">*</span></label>
             <div class="col-sm-10">
               <input type="email" formControlName="emailAddress" class="form-control" placeholder="Enter your email address" required>
+              <span class="text-danger" *ngIf="f['emailAddress'].invalid && f['emailAddress'].touched">emailAddress is required</span>
             </div>
           </div>
           <div class="mb-3 row">
@@ -73,19 +75,21 @@
               {{labels.labelMobileNo}} <span class="text-danger">*</span>
             </label>
             <div class="col-sm-10">
-              <input type="tel" class="form-control" id="inputMobileNo" formControlName="mobileNo" placeholder="Enter your mobile number"/>
+              <input type="tel" class="form-control" id="inputMobileNo" formControlName="mobileNo" placeholder="Enter your mobile number" />
             </div>
           </div>
           <div class="mb-3 row">
             <label for="inputPermanentAddress" id="labelPermanentAddress" class="col-sm-2 col-form-label">{{labels.labelPermanentAddress}}<span class="text-danger">*</span></label>
             <div class="col-sm-10">
               <textarea formControlName="permanentAddress" class="form-control" placeholder="Enter your permanent address" required></textarea>
+              <span class="text-danger" *ngIf="f['permanentAddress'].invalid && f['permanentAddress'].touched">permanentAddress is required</span>
             </div>
           </div>
           <div class="mb-3 row">
             <label for="inputPermanentPincode" id="labelPincode" class="col-sm-2 col-form-label">{{labels.labelPincode}}<span class="text-danger">*</span></label>
             <div class="col-sm-10">
               <input type="text" class="form-control" id="inputPermanentPincode" formControlName="PinCode" placeholder="Enter pincode" maxlength="6" minlength="6" pattern="[0-9]{6}" required>
+              <span class="text-danger" *ngIf="f['PinCode'].invalid && f['PinCode'].touched">PinCode is required</span>
             </div>
           </div>
           <div class="mb-3 row">
@@ -106,93 +110,104 @@
               </select>
             </div>
           </div>
+          <div class="mb-3 row">
+            <label for="inputName" id="labelKeySkills" class="col-sm-2 col-form-label">{{labels.labelKeySkills}}<span class="text-danger">*</span></label>
+            <div class="col-sm-10">
+              <input type="text" formControlName="KeySkills" class="form-control" placeholder="Enter your KeySkills" required>
+              <span class="text-danger" *ngIf="f['KeySkills'].invalid && f['KeySkills'].touched">KeySkills is required</span>
+            </div>
+          </div>
           <h4 class="text-center">{{labels.labelExperience}}</h4>
-        <hr />
+          <hr />
           <div formArrayName="experiences">
-            <div
-              *ngFor="let experience of experiences.controls; let i = index"
-              [formGroupName]="i"
-              class="experience-tab"
-            >
+            <div *ngFor="let experience of experiences.controls; let i = index"
+                 [formGroupName]="i"
+                 class="experience-tab">
               <div class="mb-3 row">
                 <label for="company" class="col-sm-2 col-form-label">{{labels.labelCompany}}<span class="text-danger">*</span></label>
                 <div class="col-sm-10">
                   <input type="text" formControlName="company" class="form-control" placeholder="Company Name" />
+                  <span class="text-danger" *ngIf="experience.get('company')?.hasError('required') && experience.get('company')?.touched">
+                    Company name is required.
+                  </span>
                 </div>
               </div>
               <div class="mb-3 row">
                 <label for="position" class="col-sm-2 col-form-label">{{labels.labelPosition}}<span class="text-danger">*</span></label>
                 <div class="col-sm-10">
                   <input type="text" formControlName="position" class="form-control" placeholder="Job Position" />
+                  <span class="text-danger" *ngIf="experience.get('position')?.hasError('required') && experience.get('position')?.touched">
+                    Position is required.
+                  </span>
                 </div>
               </div>
               <div class="mb-3 row">
-                <label for="datepicker1" id="labelFromDate" class="col-sm-2 col-form-label">{{labels.labelFromDate}}<span class="text-danger">*</span></label>
+                <label for="datepicker1-{{i}}" id="labelFromDate" class="col-sm-2 col-form-label">{{labels.labelFromDate}}<span class="text-danger">*</span></label>
                 <div class="col-sm-10">
                   <div class="input-group" style="display: flex">
-                    <input type="text" style="width:auto"
+                    <input type="text"
+                           style="width:auto"
                            class="form-control"
-                           id="datepicker1"
-                           formControlName="fromDate"
-                           name="fromDate"
-                           placeholder="dd/mm/yyyy"
-                           required />
+                           id="datepicker1-{{i}}" 
+                    formControlName="fromDate"
+                    name="fromDate"
+                    placeholder="dd/mm/yyyy"
+                    required />
                     <span class="input-group-text">
-                      <!-- <i class="entypo-calendar"></i> -->
                       <span class="material-icons" style="font-size: 17px;">calendar_today</span>
                     </span>
                   </div>
                 </div>
               </div>
               <div class="mb-3 row">
-                <label for="datepicker2" id="labelToDate" class="col-sm-2 col-form-label">{{labels.labelToDate}}<span class="text-danger">*</span></label>
+                <label for="datepicker2-{{i}}" id="labelToDate" class="col-sm-2 col-form-label">{{labels.labelToDate}}<span class="text-danger">*</span></label>
                 <div class="col-sm-10">
                   <div class="input-group" style="display: flex">
-                    <input type="text" style="width:auto"
+                    <input type="text"
+                           style="width:auto"
                            class="form-control"
-                           id="datepicker2"
-                           formControlName="toDate"
-                           name="toDate"
-                           placeholder="dd/mm/yyyy"
-                           required />
+                           id="datepicker2-{{i}}"
+                    formControlName="toDate"
+                    name="toDate"
+                    placeholder="dd/mm/yyyy"
+                    required />
                     <span class="input-group-text">
-                      <!-- <i class="entypo-calendar"></i> -->
                       <span class="material-icons" style="font-size: 17px;">calendar_today</span>
                     </span>
                   </div>
                 </div>
               </div>
               <div class="mb-3 row">
-                <label for="inputHodName" id="labelHodName" class="col-sm-2 col-form-label">{{labels.labelHodName}}<span class="text-danger">*</span></label>
+                <label for="inputHodName" id="labelHodName" class="col-sm-2 col-form-label">{{labels.labelHodName}}</label>
                 <div class="col-sm-10">
                   <input type="text" formControlName="hodName" class="form-control" placeholder="Enter HOD name" required>
                   <!-- <span class="text-danger" *ngIf="f['hodName'].invalid && f['hodName'].touched">Name is required</span> -->
                 </div>
               </div>
               <div class="mb-3 row">
-                <label for="inputHodEmail" id="labelHodEmail" class="col-sm-2 col-form-label">{{labels.labelHodEmail}}<span class="text-danger">*</span></label>
+                <label for="inputHodEmail" id="labelHodEmail" class="col-sm-2 col-form-label">{{labels.labelHodEmail}}</label>
                 <div class="col-sm-10">
                   <input type="email" formControlName="hodemailAddress" class="form-control" placeholder="Enter HOD email address" required>
                 </div>
               </div>
               <div class="mb-3 row">
                 <label for="inputHodMobileNo" id="labelHodMobileNo" class="col-sm-2 col-form-label">
-                  {{labels.labelHodMobileNo}} <span class="text-danger">*</span>
+                  {{labels.labelHodMobileNo}}
                 </label>
                 <div class="col-sm-10">
-                  <input type="tel" class="form-control" id="inputHodMobileNo" formControlName="hodmobileNo" placeholder="Enter HOD mobile number"/>
+                  <input type="tel" class="form-control" id="inputHodMobileNo" formControlName="hodmobileNo" placeholder="Enter HOD mobile number" />
                 </div>
               </div>
               <div class="text-end">
                 <div class="d-inline-block me-2">
-                <a type="button" (click)="addTab(i)" *ngIf="i === experiences.length - 1">
-                  <span class="material-icons" style="font-size: 17px;">add_circle</span>
-                </a>
-              </div>
-              <div class="d-inline-block">
-                <a *ngIf="i > 0" type="button" (click)="removeTab(i)">
-                  <span class="material-icons" style="font-size: 17px;">delete</span>
-                </a>
+                  <a type="button" (click)="addTab(i)" *ngIf="i === experiences.length - 1">
+                    <span class="material-icons" style="font-size: 17px;">add_circle</span>
+                  </a>
+                </div>
+                <div class="d-inline-block">
+                  <a *ngIf="i > 0" type="button" (click)="removeTab(i)">
+                    <span class="material-icons" style="font-size: 17px;">delete</span>
+                  </a>
                 </div>
               </div>
             </div>

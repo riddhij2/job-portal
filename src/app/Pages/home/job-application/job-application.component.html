@@ -43,9 +43,20 @@
 
           <!-- Date of Birth -->
           <div class="mb-3 row">
-            <label for="inputDOB" id="labelDOB" class="col-sm-2 col-form-label">{{labels.labelDOB}}<span class="text-danger">*</span></label>
+            <label for="datepicker" id="labelDOB" class="col-sm-2 col-form-label">{{labels.labelDOB}}<span class="text-danger">*</span></label>
             <div class="col-sm-10">
-              <input type="date" formControlName="dateOfBirth" class="datepicker_input form-control" placeholder="DD/MM/YYYY" required>
+              <div class="input-group" style="display: flex">
+                <input type="text" style="width:auto"
+                       class="form-control"
+                       id="datepicker"
+                       formControlName="dateOfBirth"
+                       name="dateOfBirth"
+                       placeholder="dd/mm/yyyy"
+                       required />
+                <span class="input-group-text">
+                  <i class="entypo-calendar"></i>
+                </span>
+              </div>
             </div>
           </div>
 

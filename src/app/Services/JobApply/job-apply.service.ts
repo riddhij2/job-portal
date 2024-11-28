@@ -34,5 +34,10 @@ export class JobApplyService {
     let url: string = environment.apiUrl + 'Master/VerifyOTP';
     return this.http.postWithoutResponse(url, model);
   }
+  OpenVacancies(groupDivisionId: Number): Observable<any> {
+    let url: string = environment.apiUrl + 'JobPosting/OpenVacancies';
+    const body = { groupDivisionId };
+    return this.http.postWithoutResponse(url, body);
+  }
 
 }

@@ -9,6 +9,13 @@ export class ApplicationlistRequest {
   'fatherMobileNo': string;
   'revenueTown': string;
   'designationName': string;
+  'createdBy': string;
+  'statusName': string;
+  'adharNo': string;
+  'bankAccountNo': string;
+  'ifscCode': string;
+  'panNo': string;
+  'bankId': number;
   'zoneName': string;
   'fatherName': string;
   'uanNo': string;
@@ -18,35 +25,29 @@ export class ApplicationlistRequest {
   'pinCode': string;
   'cAddress': string;
   'cPinCode': string;
-  'adharNo': string;
-  'bankId': number;
-  'panNo': string;
-  'bankAccountNo': string;
-  'ifscCode': string;
   'adharpath': string;
   'pancardpath': string;
   'qualificationpath': string;
   'bankDocumentpath': string;
   'passportPhotopath': string;
   'resumeFilepath': string;
-  'createdBy': string;
-  'statusName': string;
-  'martialStatus': string;
+  'maritalStatus': string;
+
 }
 export class Applicationlist {
-  'type': string;
-  'groupDivisionId': number;
-  'statusId': number;
-  'zoneId': number;
-  'subdivisionId': number;
-  'designationId': number;
-  'fromDate': string;
-  'toDate': string;
-  'applicantId': 0;
-  'bankId': 0;
-  'bankAccountNo': string;
-  'ifscCode': string;
-  'adharNo': string;
-  'panNo': string;
+  'type': string="";
+  'groupDivisionId': number=0;
+  'statusId': number=0;
+  'zoneId': number=0;
+  'subdivisionId': number=0;
+  'designationId': number=0;
+  'fromDate': string="";
+  'toDate': string="";
+  'applicantId': number=0;
+  'adharNo': string="";
+  'bankAccountNo': string="";
+  'ifscCode': string="";
+  'panNo': string="";
+  'bankId': number=0;
 }
 

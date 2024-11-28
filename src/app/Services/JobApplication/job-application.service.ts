@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/internal/Observable';
 import { environment } from '../../../environments/environment';
-import { JobApplicationFormRequest } from '../../Models/JobApplication/job-application-form-request';
+import { JobApplicationFormRequest, JobApplicationFormRequestIO, Resume } from '../../Models/JobApplication/job-application-form-request';
 import { GlobalService } from '../global/global.service';
 
 @Injectable({
@@ -70,9 +70,18 @@ export class JobApplicationService {
     if (applicationData.adharFile) formData.append('adharfile', applicationData.adharFile, applicationData.adharFile.name);
     if (applicationData.bankStatementFile) formData.append('Bankfile', applicationData.bankStatementFile);
     if (applicationData.passportPhoto) formData.append('PassportPhotofile', applicationData.passportPhoto);
-    formData.forEach((value, key) => {
-      console.log(key, value);
-    });
+    return this.http.postWithFiles(url, formData);
+  }
+
+  submitApplicationIO(applicationData: JobApplicationFormRequestIO): Observable<any> {
+    let url: string = environment.apiUrl + 'JobPosting/ApplyJob';
+    return this.http.post(url, applicationData);
+  }
+  SubmitResume(model: Resume): Observable<any> {
+    let url: string = environment.apiUrl + 'JobPosting/SubmitResume';
+    const formData = new FormData();
+    formData.append('MobileNo', model.mobileNo || '');
+    if (model.resumeFile) formData.append('Resumefile', model.resumeFile);
     return this.http.postWithFiles(url, formData);
   }
 }

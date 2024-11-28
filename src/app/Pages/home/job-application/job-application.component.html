@@ -13,6 +13,8 @@
         <h4 class="text-center">Apply For {{ position }}</h4><hr />
 
         <form [formGroup]="jobApplicationForm" (ngSubmit)="onSubmit()">
+        <div *ngIf="currentStep === 1">
+          <h4 class="text-center">Basic Details</h4>
           <!-- Sub Division -->
           <div class="mb-3 row">
             <label for="inputDivision" id="labelDivision" class="col-sm-2 col-form-label">{{labels.labelDivision}}<span class="text-danger">*</span></label>
@@ -59,9 +61,6 @@
               </div>
             </div>
           </div>
-
-
-
           <!-- Gender -->
           <div class="mb-3 row">
             <label for="inputGender" id="labelGender" class="col-sm-2 col-form-label">{{labels.labelGender}}<span class="text-danger">*</span></label>
@@ -191,7 +190,14 @@
               </div>
             </div>
           </div>
-
+          <div class="mb-3 row">
+            <div class="col-sm-12 text-center">
+          <button class="submit_btn" (click)="goToNext()">Next</button>
+          </div>
+          </div>
+        </div>
+        <div *ngIf="currentStep === 2">
+          <h4 class="text-center">Bank Details</h4>
           <!-- UAN No -->
           <div class="mb-3 row">
             <label for="inputUANNo" id="labelUANNo" class="col-sm-2 col-form-label">{{labels.labelUANNo}}</label>
@@ -274,6 +280,15 @@
               <input type="text" class="form-control" id="inputMRID" formControlName="MRID" placeholder="Enter your MRID">
             </div>
           </div>
+          <div class="mb-3 row">
+            <div class="col-sm-12 text-center">
+          <button class="submit_btn" (click)="goToPrevious()">Previous</button>
+          <button class="submit_btn" (click)="goToNext()">Next</button>
+          </div>
+          </div>
+        </div>
+        <div *ngIf="currentStep === 3">
+          <h4 class="text-center">Upload Files</h4>
           <!-- File Inputs (Adhar, Pan, Qualification, etc.) -->
           <div class="mb-3 row">
             <label for="inputAdharFile" class="col-sm-2 col-form-label">{{ labels.labelAdhar }} <span class="text-danger">*</span></label>
@@ -349,9 +364,11 @@
           <!-- Submit Button -->
           <div class="mb-3 row">
             <div class="col-sm-12 text-center">
+              <button class="submit_btn" (click)="goToPrevious()">Previous</button>
               <button type="submit" [disabled]="jobApplicationForm.invalid" class="submit_btn">Submit</button>
             </div>
           </div>
+        </div>
         </form>
       </div>
     </div>

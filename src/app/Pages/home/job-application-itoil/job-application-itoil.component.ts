@@ -34,7 +34,8 @@ export class JobApplicationITOilComponent {
   MobileNo = '';
   applicationData: JobApplicationFormRequestIO = new JobApplicationFormRequestIO();
   resumeModel = new Resume;
-;
+  currentStep: number = 1;
+
   minDate = new Date(2000, 0, 1);
   maxDate = new Date(2020, 0, 1);
 
@@ -148,6 +149,18 @@ export class JobApplicationITOilComponent {
           });
         }
       );
+    }
+  }
+
+  goToNext(): void {
+    if (this.currentStep < 3) {
+      this.currentStep++;
+    }
+  }
+
+  goToPrevious(): void {
+    if (this.currentStep > 1) {
+      this.currentStep--;
     }
   }
 

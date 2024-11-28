@@ -36,6 +36,7 @@ export class JobApplicationComponent {
   applicationData: JobApplicationFormRequest = new JobApplicationFormRequest();
   minDate = new Date(2000, 0, 1);
   maxDate = new Date(2020, 0, 1);
+  currentStep: number = 1;
 
   constructor(private fb: FormBuilder, private router: Router, private jobappservice: JobApplicationService, private datePipe: DatePipe) { }
 
@@ -201,6 +202,18 @@ export class JobApplicationComponent {
     sessionStorage.setItem('fatherName', this.jobApplicationForm.get('fatherName')?.value);
     window.open('/T&C', '_blank');
   }
+  goToNext(): void {
+    if (this.currentStep < 3) {
+      this.currentStep++;
+    }
+  }
+
+  goToPrevious(): void {
+    if (this.currentStep > 1) {
+      this.currentStep--;
+    }
+  }
+
   onFileChange(event: Event, fieldName: string): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {

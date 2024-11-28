@@ -13,6 +13,8 @@
         <h4 class="text-center">Apply For {{ position }}</h4><hr />
 
         <form [formGroup]="jobApplicationForm" (ngSubmit)="onSubmit()">
+        <div *ngIf="currentStep === 1">
+          <h4 class="text-center">Basic Details</h4>
           <div class="mb-3 row">
             <label for="inputName" id="labelName" class="col-sm-2 col-form-label">{{labels.labelName}}<span class="text-danger">*</span></label>
             <div class="col-sm-10">
@@ -117,8 +119,15 @@
               <span class="text-danger" *ngIf="f['KeySkills'].invalid && f['KeySkills'].touched">KeySkills is required</span>
             </div>
           </div>
+          <div class="mb-3 row">
+            <div class="col-sm-12 text-center">
+          <button class="submit_btn" (click)="goToNext()">Next</button>
+          </div>
+          </div>
+        </div>
+        <div *ngIf ="currentStep === 2">
           <h4 class="text-center">{{labels.labelExperience}}</h4>
-          <hr />
+          <!-- <hr /> -->
           <div formArrayName="experiences">
             <div *ngFor="let experience of experiences.controls; let i = index"
                  [formGroupName]="i"
@@ -212,7 +221,16 @@
               </div>
             </div>
           </div>
-          <hr />
+          <!-- <hr /> -->
+          <div class="mb-3 row">
+            <div class="col-sm-12 text-center">
+          <button class="submit_btn" (click)="goToPrevious()">Previous</button>
+          <button class="submit_btn" (click)="goToNext()">Next</button>
+          </div>
+          </div>
+        </div>
+        <div *ngIf ="currentStep === 3">
+          <h4 class="text-center">Upload File</h4>
           <div class="mb-3 row" style="margin-top: 1rem;">
             <label for="inputResume" class="col-sm-2 col-form-label">{{ labels.labelResume }} <span class="text-danger" *ngIf="position === 'Superviser'">*</span></label>
             <div class="col-sm-10">
@@ -224,9 +242,11 @@
           </div>
           <div class="mb-3 row">
             <div class="col-sm-12 text-center">
+              <button class="submit_btn" (click)="goToPrevious()">Previous</button>
               <button type="submit" [disabled]="jobApplicationForm.invalid" class="submit_btn">Submit</button>
             </div>
           </div>
+        </div>
         </form>
       </div>
     </div>

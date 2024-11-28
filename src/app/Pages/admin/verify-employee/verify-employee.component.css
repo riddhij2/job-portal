@@ -97,4 +97,8 @@
   object-fit: contain;  /* Ensures the content fits within the iframe */
 }
 
-  
+.width-180 {
+  max-width: 190px !important;
+  width: 100%;
+}
+

@@ -2,7 +2,7 @@
   <div class="container">
     <div class="row">
       <div class="add-a-job-box">
-        <h2 class="text-center">Verify Your OTP</h2>
+        <h2 class="text-center">Verify Your Whatsapp OTP</h2>
         <form [formGroup]="otpForm" (ngSubmit)="onSubmit()">
           <div class="mb-3 row">
             <div class="col-sm-12">
@@ -16,6 +16,9 @@
           </div>
           <div class="mb-3 row">
             <div class="col-sm-12 text-center">
+              <button type="button" class="submit_btn" (click)="onResendOTP()">
+                Resend OTP
+              </button>
               <button type="submit" class="submit_btn" [disabled]="otpForm.invalid">
                 Verify OTP
               </button>

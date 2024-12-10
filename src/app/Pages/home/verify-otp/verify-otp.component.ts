@@ -31,7 +31,7 @@ export class VerifyOTPComponent {
     this.groupName = groupName ? JSON.parse(groupName) : '';
     let MobileNo = sessionStorage.getItem('MobileNo');
     this.MobileNo = MobileNo ? JSON.parse(MobileNo) : '';
-    if (this.designationId == 0 && this.groupName == '' && this.zoneId == 0) {
+    if (this.designationId == 0 && this.groupName == '') {
       this.router.navigate(['/JobApply']);
     }
     else if (this.MobileNo == '') {
@@ -56,7 +56,10 @@ export class VerifyOTPComponent {
       this.jobservice.VerifyOTP(this.SendOtpmodel).subscribe(
         (result: any) => {
           if (result.status == "Message sent successfully") {
-            this.router.navigate(['/JobApplication'])
+            if (this.groupId == 3 || this.groupId == 4)
+              this.router.navigate(['/JobApplication']);
+            else
+              this.router.navigate(['/JobApplicationIO']);
           }
         },
         (error: any) => {
@@ -66,5 +69,32 @@ export class VerifyOTPComponent {
           });
         });
     }
+  }
+  onResendOTP(): void {
+    this.SendOtpmodel = {
+      mobileNo: this.MobileNo,
+      zonId: this.zoneId,
+      designationId: this.designationId,
+      groupDivisionId: this.groupId,
+      otp: ''
+    };
+    this.jobservice.ReSendWhatsappOTP(this.SendOtpmodel).subscribe(
+      (result: any) => {
+        if (result.status == 200) {
+          sessionStorage.setItem('MobileNo', JSON.stringify(this.SendOtpmodel.mobileNo));
+          Swal.fire({
+            title: "OTP Resent Successfully",
+            text: "Please save this OTP for future reference, as you'll need it to edit your profile.",
+            icon: "success",
+            confirmButtonText: "OK"
+          })
+        }
+      },
+      (error: any) => {
+        Swal.fire({
+          text: error.message,
+          icon: "error"
+        });
+      });
   }
 }

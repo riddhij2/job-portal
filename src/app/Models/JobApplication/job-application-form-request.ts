@@ -1,8 +1,8 @@
 export class JobApplicationFormRequest {
-  'MRID': string;
+  'mrid': string;
   'FacebookId': string;
   'gender': string;
-  'PinCode': string;
+  'pinCode': string;
   'uanNo': string;
   'mobileNo': string;
   'maritalStatus': string;
@@ -11,30 +11,32 @@ export class JobApplicationFormRequest {
   'panFile': File;
   'districtId': string;
   'resumeFile': File;
-  'correspondenceState': string;
-  'correspondencePincode': string;
+  'cStateId': string;
+  'cPinCode': string;
   'LinkdinId': string;
   'name': string;
   'qualificationFile': File;
   'stateId': string;
-  'correspondenceDistrict': string;
+  'cDistrictId': string;
   'InstagramId': string;
   'bankAccountNo': string;
   'adharFile': File;
   'TwiterId': string;
-  'bankName': string;
+  'bankId': string;
   'revenueId': string;
   'adharNo': string;
   'emailAddress': string;
   'bankStatementFile': File;
   'dateOfBirth': string;
-  'correspondenceAddress': string;
+  'cAddress': string;
   'ifscCode': string;
   'passportPhoto': File;
   'panNo': string;
   'esiNo': string;
   'fatherMobileNo': string;
 }
+
+
 
 export class JobApplicationFormRequestIO {
   'FacebookId': string;
@@ -53,6 +55,7 @@ export class JobApplicationFormRequestIO {
   'emailAddress': string;
   'dateOfBirth': string;
   'ExpDtl': Experience[];
+  'languageDtl': Language[];
 }
 
 export class Experience {
@@ -67,5 +70,13 @@ export class Experience {
 export class Resume {
   'resumeFile': File;
   'mobileNo': string;
+}
+
+export class Language {
+  'language': string;
+  'understand': boolean;
+  'read': boolean;
+  'write': boolean;
+  'speak': boolean;
 }
 

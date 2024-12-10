@@ -1,74 +1,179 @@
 import { CommonModule, DatePipe, NgFor, NgIf, TitleCasePipe } from '@angular/common';
 import { Component } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Router, RouterLink } from '@angular/router';
+import { Bank, District, LanguageLabels, State, SubDivision } from '../../../Models/JobApplication/language-labels';
+import { JobApplicationService } from '../../../Services/JobApplication/job-application.service';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
-import { District, LanguageLabels, State } from '../../../Models/JobApplication/language-labels';
-import { Experience, JobApplicationFormRequest, JobApplicationFormRequestIO, Resume } from '../../../Models/JobApplication/job-application-form-request';
-import { JobApplicationService } from '../../../Services/JobApplication/job-application.service';
-import { switchMap } from 'rxjs';
-
+import { JobApplicationFormRequest } from '../../../Models/JobApplication/job-application-form-request';
+import { SendOTPRequest } from '../../../Models/SendOTP/send-otprequest';
 declare var Swal: any;
 declare var $: any;
 
 
 @Component({
-  selector: 'app-job-application-itoil',
+  selector: 'app-job-application',
   standalone: true,
   imports: [RouterLink, ReactiveFormsModule, NgIf, FormsModule, NgFor, TitleCasePipe, DatePipe, CommonModule, MatDatepickerModule, MatInputModule, MatNativeDateModule],
-  templateUrl: './job-application-itoil.component.html',
-  styleUrl: './job-application-itoil.component.css',
+  templateUrl: './job-application.component.html',
+  styleUrl: './job-application.component.css',
   providers: [DatePipe, MatDatepickerModule]
 })
-export class JobApplicationITOilComponent {
+export class JobApplicationComponent {
   jobApplicationForm: FormGroup = new FormGroup({});
+  BankDetailsForm: FormGroup = new FormGroup({});
+  UploadFilesForm: FormGroup = new FormGroup({});
   position: string = '';
+  projectName: string = '';
+  locationName: string = '';
   labels = new LanguageLabels();
+  SendOtpmodel = new SendOTPRequest();
   states: State[] = [];
   districtsForState: District[] = [];
   districtsForCorrespondenceState: District[] = [];
   language = "";
+  ZoneId = 0;
   MobileNo = '';
-  applicationData: JobApplicationFormRequestIO = new JobApplicationFormRequestIO();
-  resumeModel = new Resume;
-  currentStep: number = 1;
-
+  banks: Bank[] = [];
+  subDivisions: SubDivision[] = [];
+  applicationData: JobApplicationFormRequest = new JobApplicationFormRequest();
   minDate = new Date(2000, 0, 1);
   maxDate = new Date(2020, 0, 1);
+  currentStep: number = 1;
 
   constructor(private fb: FormBuilder, private router: Router, private jobappservice: JobApplicationService, private datePipe: DatePipe) { }
 
   ngOnInit(): void {
     this.MobileNo = JSON.parse(sessionStorage.getItem('MobileNo') || '')
+    this.ZoneId = Number(JSON.parse(sessionStorage.getItem('zoneId') || '0'));
     this.position = JSON.parse(sessionStorage.getItem('groupName') || '')
-    const mobileNo = sessionStorage.getItem('MobileNo');
-    this.MobileNo = mobileNo ? JSON.parse(mobileNo) : '';
+    this.projectName = JSON.parse(sessionStorage.getItem('projectName') || 'PhotoBilling')
+    if (this.projectName == null)
+      this.projectName = 'PhotoBilling';
+    this.locationName = JSON.parse(sessionStorage.getItem('locationName') || '')
     this.jobApplicationForm = this.fb.group({
+      revenueId: [0, Validators.required],
       name: ['', Validators.required],
-      KeySkills: ['', Validators.required],
+      fatherName: ['', Validators.required],
       dateOfBirth: ['', Validators.required],
-      gender: ['', Validators.required],
+      gender: ['Male', Validators.required],
       maritalStatus: ['', Validators.required],
       emailAddress: ['', [Validators.required, Validators.email]],
       mobileNo: [{ value: this.MobileNo, disabled: true }, Validators.required],
       permanentAddress: ['', Validators.required],
       stateId: ['', Validators.required],
       districtId: [{ value: '' }, Validators.required],
-      PinCode: ['', Validators.required],
-      resumeFile: ['', Validators.required],
-      experiences: this.fb.array([this.createExperienceTab()])
+      pinCode: ['', Validators.required],
+      cAddress: ['', Validators.required],
+      cStateId: ['', Validators.required],
+      cDistrictId: [{ value: '' }, Validators.required],
+      cPinCode: ['', Validators.required],
+      copyAddress: [false],
+      fatherMobileNo: ['', [Validators.required, Validators.pattern('[0-9]{10}')]],
     });
+    this.BankDetailsForm = this.fb.group({
+      uanNo: ['', [Validators.pattern('[0-9]{12}')]],
+      esiNo: [''],
+      panNo: ['', [Validators.required, Validators.pattern(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/)]],
+      bankId: ['', [Validators.required]],
+      bankAccountNo: ['', [Validators.required, Validators.pattern(/^\d{9,18}$/)]],
+      ifscCode: ['', [Validators.required, Validators.pattern('^[A-Za-z0-9]{11}$')]],
+      adharNo: ['', [Validators.required, Validators.pattern('[0-9]{12}')]],
+      mrid: [''],
+    });
+    this.UploadFilesForm = this.fb.group({
+      adharFile: ['', Validators.required],
+      panFile: ['', Validators.required],
+      qualificationFile: ['', Validators.required],
+      bankStatementFile: ['', Validators.required],
+      resumeFile: [''],
+      passportPhoto: ['', Validators.required],
+      termsCheck: [false, Validators.requiredTrue]
+    });
+    this.loadUserData(this.MobileNo);
+    this.GetSubDivision(this.ZoneId);
+    this.GetBankName();
     this.GetState();
     this.jobApplicationForm.get('stateId')?.setValue(3);
+    this.jobApplicationForm.get('cStateId')?.setValue(3);
     this.GetCity(3, 'permanent');
+    this.GetCity(3, 'correspondence');
     this.jobApplicationForm.get('districtId')?.setValue(0);
+    this.jobApplicationForm.get('cDistrictId')?.setValue(0);
     this.changeLabels('en');
+  }
+
+  formatDate(date: string): string {
+    if (!date) {
+      return ''; 
+    }
+    const d = new Date(date);
+    const day = ('0' + d.getDate()).slice(-2); 
+    const month = ('0' + (d.getMonth() + 1)).slice(-2); 
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+  loadUserData(mobileno: string): void {
+    this.SendOtpmodel = {
+      mobileNo: mobileno,
+      zonId: this.ZoneId,
+      designationId: 0,
+      groupDivisionId: 0,
+      otp: ''
+    };
+    this.jobappservice.getUserDetails(this.SendOtpmodel).subscribe((data: any) => {
+      this.applicationData = data.body[0];
+      const formattedDateOfBirth = this.formatDate(this.applicationData.dateOfBirth);
+      this.jobApplicationForm.patchValue({
+        revenueId: this.applicationData.revenueId,
+        name: this.applicationData.name,
+        fatherName: this.applicationData.fatherName,
+        dateOfBirth: formattedDateOfBirth,
+        gender: this.applicationData.gender || 'Male',
+        maritalStatus: this.applicationData.maritalStatus || '',
+        emailAddress: this.applicationData.emailAddress,
+        mobileNo: this.applicationData.mobileNo,
+        permanentAddress: this.applicationData.permanentAddress,
+        stateId: this.applicationData.stateId || '',
+        districtId: this.applicationData.districtId,
+        pinCode: this.applicationData.pinCode,
+        cAddress: this.applicationData.cAddress,
+        cStateId: this.applicationData.cStateId || '0',
+        cDistrictId: this.applicationData.cDistrictId,
+        cPinCode: this.applicationData.cPinCode,
+        fatherMobileNo: this.applicationData.fatherMobileNo,
+      });
+      if (this.applicationData.stateId)
+        this.GetCity(Number(this.applicationData.stateId), 'permanent');
+      if (this.applicationData.cStateId)
+        this.GetCity(Number(this.applicationData.stateId), 'correspondence');
+      this.BankDetailsForm.patchValue({
+        uanNo: this.applicationData.uanNo,
+        esiNo: this.applicationData.esiNo,
+        panNo: this.applicationData.panNo,
+        bankId: this.applicationData.bankId,
+        bankAccountNo: this.applicationData.bankAccountNo,
+        ifscCode: this.applicationData.ifscCode,
+        adharNo: this.applicationData.adharNo,
+        mrid: this.applicationData.mrid,
+      });
+
+      this.UploadFilesForm.patchValue({
+        panFile: this.applicationData.panFile,
+        adharFile: this.applicationData.adharFile,
+        qualificationFile: this.applicationData.qualificationFile,
+        bankStatementFile: this.applicationData.bankStatementFile,
+        resumeFile: this.applicationData.resumeFile,
+        passportPhoto: this.applicationData.passportPhoto,
+      });
+    });
   }
   onStateChange(event: any, type: string): void {
     const selectedStateId = +event.target.value;
+
     if (selectedStateId) {
       if (type === 'permanent') {
         this.jobApplicationForm.patchValue({
@@ -78,80 +183,181 @@ export class JobApplicationITOilComponent {
         this.jobApplicationForm.get('districtId')?.enable();
       } else if (type === 'correspondence') {
         this.jobApplicationForm.patchValue({
-          correspondenceDistrict: ''
+          cDistrictId: ''
         });
+        this.GetCity(selectedStateId, 'correspondence');
+        this.jobApplicationForm.get('cDistrictId')?.enable();
       }
     } else {
       if (type === 'permanent') {
+        //this.jobApplicationForm.get('districtId')?.disable();
         this.districtsForState = [];
       } else if (type === 'correspondence') {
+        //this.jobApplicationForm.get('correspondenceDistrict')?.disable();
         this.districtsForCorrespondenceState = [];
       }
     }
   }
   get f() {
-
     return this.jobApplicationForm.controls;
   }
+  get g() {
+    return this.BankDetailsForm.controls;
+  }
+  get h() {
+    return this.UploadFilesForm.controls;
+  }
 
-  onSubmit(): void {
-    debugger;
-    if (this.jobApplicationForm.valid) {
-      this.jobApplicationForm.get('mobileNo')?.enable();
-      this.applicationData.name = this.jobApplicationForm.controls['name'].value;
-      const dateOfBirth = this.jobApplicationForm.controls['dateOfBirth'].value;
-      const [day, month, year] = dateOfBirth.split('/');
-      const formattedDate = new Date(`${year}-${month}-${day}`);
-      this.applicationData.dateOfBirth = this.datePipe.transform(formattedDate, 'dd/MM/yyyy') || '';
-      this.applicationData.gender = this.jobApplicationForm.controls['gender'].value;
-      this.applicationData.maritalStatus = this.jobApplicationForm.controls['maritalStatus'].value;
-      this.applicationData.emailAddress = this.jobApplicationForm.controls['emailAddress'].value;
-      this.applicationData.mobileNo = this.jobApplicationForm.controls['mobileNo'].value;
-      this.applicationData.permanentAddress = this.jobApplicationForm.controls['permanentAddress'].value;
-      this.applicationData.stateId = this.jobApplicationForm.controls['stateId'].value;
-      this.applicationData.districtId = this.jobApplicationForm.controls['districtId'].value;
-      this.applicationData.PinCode = this.jobApplicationForm.controls['PinCode'].value;
-      this.applicationData.KeySkills = this.jobApplicationForm.controls['KeySkills'].value;
-      const experiences: Experience[] = this.jobApplicationForm.value.experiences.map((exp: any) => ({
-        companyName: exp.company,
-        joiningDate: exp.fromDate,
-        relievingDate: exp.toDate,
-        hodName: exp.hodName,
-        mobileNo: exp.hodmobileNo,
-        emailAddress: exp.hodemailAddress,
-        position: exp.position
-      }));
-      this.applicationData.ExpDtl = experiences;
-      this.resumeModel.mobileNo = this.applicationData.mobileNo;
-      this.jobappservice.submitApplicationIO(this.applicationData).pipe(
-        switchMap((result: any) => {
-          if (result.status == 200) {
-            return this.jobappservice.SubmitResume(this.resumeModel);
-          } else {
-            throw new Error('Failed to submit application');
-          }
-        })
-      ).subscribe(
-        (response: any) => {
-          Swal.fire({
-            title: 'Success!',
-            text: 'Your application has been submitted successfully.',
-            icon: 'success',
-            confirmButtonText: 'OK'
-          }).then(() => {
-            this.router.navigate(['']);
-          });
-        },
-        (error: any) => {
-          Swal.fire({
-            text: error.error?.title || 'An error occurred',
-            icon: 'error'
-          });
+  //onSubmit(): void {
+  //  if (this.jobApplicationForm.valid) {
+  //    this.jobApplicationForm.get('mobileNo')?.enable();
+  //    this.jobApplicationForm.get('correspondenceDistrict')?.enable();
+  //    this.applicationData.revenueId = this.jobApplicationForm.controls['revenueId'].value;
+  //    this.applicationData.name = this.jobApplicationForm.controls['name'].value;
+  //    this.applicationData.fatherName = this.jobApplicationForm.controls['fatherName'].value;
+  //    const dateOfBirth = this.jobApplicationForm.controls['dateOfBirth'].value;
+  //    this.applicationData.dateOfBirth = this.datePipe.transform(dateOfBirth, 'dd/MM/yyyy') || '';
+  //    this.applicationData.gender = this.jobApplicationForm.controls['gender'].value;
+  //    this.applicationData.maritalStatus = this.jobApplicationForm.controls['maritalStatus'].value;
+  //    this.applicationData.emailAddress = this.jobApplicationForm.controls['emailAddress'].value;
+  //    this.applicationData.mobileNo = this.jobApplicationForm.controls['mobileNo'].value;
+  //    this.applicationData.permanentAddress = this.jobApplicationForm.controls['permanentAddress'].value;
+  //    this.applicationData.stateId = this.jobApplicationForm.controls['stateId'].value;
+  //    this.applicationData.districtId = this.jobApplicationForm.controls['districtId'].value;
+  //    this.applicationData.PinCode = this.jobApplicationForm.controls['PinCode'].value;
+  //    this.applicationData.correspondenceAddress = this.jobApplicationForm.controls['correspondenceAddress'].value;
+  //    this.applicationData.correspondenceState = this.jobApplicationForm.controls['correspondenceState'].value;
+  //    this.applicationData.correspondenceDistrict = this.jobApplicationForm.controls['correspondenceDistrict'].value;
+  //    this.applicationData.correspondencePincode = this.jobApplicationForm.controls['correspondencePincode'].value;
+  //    this.applicationData.fatherMobileNo = this.jobApplicationForm.controls['fatherMobileNo'].value;
+  //    this.applicationData.uanNo = this.BankDetailsForm.controls['uanNo'].value;
+  //    this.applicationData.esiNo = this.BankDetailsForm.controls['esiNo'].value;
+  //    this.applicationData.panNo = this.BankDetailsForm.controls['panNo'].value;
+  //    this.applicationData.bankName = this.BankDetailsForm.controls['bankName'].value;
+  //    this.applicationData.bankAccountNo = this.BankDetailsForm.controls['bankAccountNo'].value;
+  //    this.applicationData.ifscCode = this.BankDetailsForm.controls['ifscCode'].value;
+  //    this.applicationData.adharNo = this.BankDetailsForm.controls['adharNo'].value;
+  //    this.applicationData.MRID = this.BankDetailsForm.controls['MRID'].value;
+  //    this.jobappservice.submitApplication(this.applicationData).subscribe(
+  //      (result: any) => {
+  //        if (result.status == 200) {
+  //          Swal.fire({
+  //            title: 'Success!',
+  //            text: 'Your application has been submitted successfully.',
+  //            icon: 'success',
+  //            confirmButtonText: 'OK'
+  //          }).then(() => {
+  //            this.router.navigate(['']);
+  //          });
+  //        }
+  //      },
+  //      (error: any) => {
+  //        Swal.fire({
+  //          text: error.error.title,
+  //          icon: "error"
+  //        });
+  //      });
+  //  }
+  //}
+  onSubmitCurrentForm(): void {
+    if (this.currentStep === 1 && this.jobApplicationForm.valid) {
+      this.submitJobApplicationForm();
+    } else if (this.currentStep === 2 && this.BankDetailsForm.valid) {
+      this.submitBankDetailsForm();
+    } else if (this.currentStep === 3 && this.UploadFilesForm.valid) {
+      this.submitUploadFilesForm();
+    } else {
+      Object.keys(this.BankDetailsForm.controls).forEach(key => {
+        const control = this.BankDetailsForm.get(key);
+        if (control && !control.valid) {
+          console.error(`Field ${key} is invalid.`, control.errors);
         }
-      );
+      });
+      Swal.fire('Error', 'Please fill out all required fields.', 'error');
     }
   }
 
+  submitJobApplicationForm(): void {
+    Object.assign(this.applicationData, this.jobApplicationForm.value);
+    this.jobappservice.submitApplication(this.applicationData).subscribe(
+      (result: any) => {
+        if (result.status == 200) {
+          Swal.fire('Success!', 'Basic Details submitted successfully.', 'success').then(() => {
+            this.currentStep++;
+          });
+        }
+      },
+      (error: any) => {
+        Swal.fire('Error', error.error.title, 'error');
+      }
+    );
+  }
+
+  submitBankDetailsForm(): void {
+    Object.assign(this.applicationData, this.BankDetailsForm.value);
+    this.jobappservice.submitApplication(this.applicationData).subscribe(
+      (result: any) => {
+        if (result.status == 200) {
+          Swal.fire('Success!', 'Bank details submitted successfully.', 'success').then(() => {
+            this.currentStep++;
+          });
+        }
+      },
+      (error: any) => {
+        Swal.fire('Error', error.error.title, 'error');
+      }
+    );
+  }
+
+  submitUploadFilesForm(): void {
+    this.jobappservice.submitApplication(this.applicationData).subscribe(
+      (result: any) => {
+        if (result.status == 200) {
+          Swal.fire({
+              title: 'Success!',
+              text: 'Your application has been submitted successfully.',
+              icon: 'success',
+             confirmButtonText: 'OK'
+            }).then(() => {
+              this.router.navigate(['']);
+            });
+        }
+      },
+      (error: any) => {
+        Swal.fire('Error', error.error.title, 'error');
+      }
+    );
+  }
+
+
+  onCopyAddressChange(event: any): void {
+    if (event.target.checked) {
+      this.jobApplicationForm.patchValue({
+        cAddress: this.jobApplicationForm.get('permanentAddress')?.value,
+        cPinCode: this.jobApplicationForm.get('pinCode')?.value,
+        cStateId: this.jobApplicationForm.get('stateId')?.value,
+        cDistrictId: this.jobApplicationForm.get('districtId')?.value,
+      });
+      const permanentStateId = this.jobApplicationForm.get('stateId')?.value;
+      if (permanentStateId) {
+        this.GetCity(permanentStateId, 'correspondence');
+      }
+    } else {
+      this.jobApplicationForm.patchValue({
+        cAddress: '',
+        cPinCode: '',
+        cStateId: '',
+        cDistrictId: '',
+      });
+      this.districtsForCorrespondenceState = [];
+    }
+  }
+  submitTermsForm() {
+    if (this.jobApplicationForm.get('termsCheck')?.value == true && this.jobApplicationForm.get('name')?.value && this.jobApplicationForm.get('fatherName')?.value)
+      sessionStorage.setItem('name', this.jobApplicationForm.get('name')?.value);
+    sessionStorage.setItem('fatherName', this.jobApplicationForm.get('fatherName')?.value);
+    window.open('/T&C', '_blank');
+  }
   goToNext(): void {
     if (this.currentStep < 3) {
       this.currentStep++;
@@ -164,27 +370,45 @@ export class JobApplicationITOilComponent {
     }
   }
 
-
   onFileChange(event: Event, fieldName: string): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
-      const allowedTypes = ['pdf'];
+      const allowedTypes = ['pdf', 'jpg', 'jpeg', 'png'];
       const filename = file.name;
       const extension = filename.split('.').pop()?.toLowerCase();
       if (extension && !allowedTypes.includes(extension)) {
         Swal.fire({
           icon: 'error',
           title: 'Invalid file type!',
-          text: 'Please upload a PDF file.',
+          text: 'Please upload a PDF, JPG, JPEG, or PNG file.',
           confirmButtonText: 'OK'
         });
         input.value = '';
       }
       else {
-
-        this.resumeModel.resumeFile = file;
-
+        switch (fieldName) {
+          case 'adharFile':
+            this.applicationData.adharFile = file;
+            break;
+          case 'panFile':
+            this.applicationData.panFile = file;
+            break;
+          case 'qualificationFile':
+            this.applicationData.qualificationFile = file;
+            break;
+          case 'bankStatementFile':
+            this.applicationData.bankStatementFile = file;
+            break;
+          case 'resumeFile':
+            this.applicationData.resumeFile = file;
+            break;
+          case 'passportPhoto':
+            this.applicationData.passportPhoto = file;
+            break;
+          default:
+            console.error('Unknown field name:', fieldName);
+        }
       }
     }
   }
@@ -226,15 +450,6 @@ export class JobApplicationITOilComponent {
         labelPan: "Pan Card",
         labelAdhar: "Aadhar Card",
         labelMRID: "MRID",
-        labelHodName: "HOD Name",
-        labelHodEmail: "HOD Email Address",
-        labelHodMobileNo: "HOD Mobile No",
-        labelFromDate: "Starting Date",
-        labelToDate: "Leaving Date",
-        labelCompany: "Company Name",
-        labelPosition: "Position",
-        labelExperience: "Experience Details",
-        labelKeySkills: "KeySkills",
       };
     } else if (language == 'hn') {
       this.labels = {
@@ -269,16 +484,7 @@ export class JobApplicationITOilComponent {
         labelQualification: "योग्यता",
         labelPan: "पैन कार्ड",
         labelAdhar: "आधार कार्ड",
-        labelMRID: "MRID",
-        labelHodName: "HOD नाम",
-        labelHodEmail: "HOD ईमेल पता",
-        labelHodMobileNo: "HOD मोबाइल नंबर",
-        labelFromDate: "आरंभ तिथि",
-        labelToDate: "छोड़ने की तारीख",
-        labelCompany: "कंपनी नाम",
-        labelPosition: "पद",
-        labelExperience: "अनुभव विवरण",
-        labelKeySkills: "प्रमुख कौशल",
+        labelMRID: "MRID"
       };
     }
   }
@@ -315,70 +521,46 @@ export class JobApplicationITOilComponent {
       }
     );
   }
-  get experiences(): FormArray {
-    return this.jobApplicationForm.get('experiences') as FormArray;
+  GetBankName() {
+    this.jobappservice.GetBankName().subscribe(
+      (result: any) => {
+        if (result != null) {
+          this.banks = result.body;
+        }
+      },
+      (error: any) => {
+        Swal.fire({
+          text: error.message,
+          icon: "error"
+        });
+      });
   }
-
-  // Create a new experience tab
-  createExperienceTab(): FormGroup {
-    return this.fb.group({
-      company: ['', Validators.required],
-      position: ['', Validators.required],
-      fromDate: ['', Validators.required],
-      toDate: ['', Validators.required],
-      hodName: [''],
-      hodmobileNo: [''],
-      hodemailAddress: ['']
-    });
+  GetSubDivision(zoneId: number) {
+    this.jobappservice.GetSubDivision(zoneId).subscribe(
+      (result: any) => {
+        if (result != null) {
+          this.subDivisions = result.body;
+        }
+      },
+      (error: any) => {
+        Swal.fire({
+          text: error.message,
+          icon: "error"
+        });
+      });
   }
-  addTab(index: number): void {
-    this.experiences.push(this.createExperienceTab());
-    this.initializeDatepickers();
-  }
-  removeTab(index: number): void {
-    if (this.experiences.length > 1) {
-      this.experiences.removeAt(index);
-      this.initializeDatepickers();
-    }
-  }
-  saveExperience(index: number) {
-    const experience = this.experiences.at(index).value;
-    console.log('Saved experience:', experience);
-  }
-
   ngAfterViewInit(): void {
+    const today = new Date();
+    const eighteenYearsAgo = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
     $('#datepicker').datepicker({
       format: 'dd/mm/yyyy',
       autoclose: true,
       todayHighlight: true,
+      endDate: eighteenYearsAgo,
     })
       .on('changeDate', (e: any) => {
         const selectedDate = e.format('dd/mm/yyyy');
         this.jobApplicationForm.patchValue({ dateOfBirth: selectedDate });
       });
-    this.initializeDatepickers();
-  }
-  initializeDatepickers() {
-    setTimeout(() => {
-      this.experiences.controls.forEach((experience, index) => {
-        $(`#datepicker1-${index}`).datepicker({
-          format: 'dd/mm/yyyy',
-          autoclose: true,
-          todayHighlight: true,
-        }).on('changeDate', (e: any) => {
-          const selectedFromDate = e.format('yyyy-mm-dd');
-          experience.patchValue({ fromDate: selectedFromDate });
-        });
-
-        $(`#datepicker2-${index}`).datepicker({
-          format: 'dd/mm/yyyy',
-          autoclose: true,
-          todayHighlight: true,
-        }).on('changeDate', (e: any) => {
-          const selectedToDate = e.format('yyyy-mm-dd');
-          experience.patchValue({ toDate: selectedToDate });
-        });
-      });
-    }, 0);
   }
 }

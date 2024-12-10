@@ -12,14 +12,22 @@
         </div>
         <h4 class="text-center">Apply For {{ position }}</h4><hr />
 
-        <form [formGroup]="jobApplicationForm" (ngSubmit)="onSubmit()">
+      <form [formGroup]="jobApplicationForm">
         <div *ngIf="currentStep === 1">
           <h4 class="text-center">Basic Details</h4>
           <div class="mb-3 row">
             <label for="inputName" id="labelName" class="col-sm-2 col-form-label">{{labels.labelName}}<span class="text-danger">*</span></label>
-            <div class="col-sm-10">
-              <input type="text" formControlName="name" class="form-control" placeholder="Enter your name" required>
-              <span class="text-danger" *ngIf="f['name'].invalid && f['name'].touched">Name is required</span>
+            <div class="col-sm-3 width-27">
+              <input type="text" formControlName="Fname" class="form-control" placeholder="First Name" required>
+              <span class="text-danger" *ngIf="f['Fname'].invalid && f['Fname'].touched">First Name is required</span>
+            </div>
+            <div class="col-sm-3 width-27">
+              <input type="text" formControlName="Mname" class="form-control" placeholder="Middle Name" required>
+              <!-- <span class="text-danger" *ngIf="f['Mname'].invalid && f['Mname'].touched">Name is required</span> -->
+            </div>
+            <div class="col-sm-3 width-27">
+              <input type="text" formControlName="Lname" class="form-control" placeholder="Last Name" required>
+              <span class="text-danger" *ngIf="f['Lname'].invalid && f['Lname'].touched">Last Name is required</span>
             </div>
           </div>
           <div class="mb-3 row">
@@ -81,17 +89,255 @@
             </div>
           </div>
           <div class="mb-3 row">
+            <div class="col-sm-12 text-center">
+          <button class="submit_btn" (click)="goToNext()">Next</button>
+          </div>
+          </div>
+        </div>
+      </form>
+      <form [formGroup] ="passportDetailsForm">
+        <div *ngIf = "currentStep === 2">
+          <h4 class="text-center">Passport Details</h4>
+          <div class="mb-3 row">
+            <label for="passportNo" id="labelPassportNumber" class="col-sm-2 col-form-label">
+              Passport Number <span class="text-danger">*</span>
+            </label>
+            <div class="col-sm-10">
+            <input type="text" class="form-control" id="inputPassportNo" formControlName="passportNo" placeholder="Enter Passport Number"/>
+            <span *ngIf="passportDetailsForm.get('passportNo')?.touched && passportDetailsForm.get('passportNo')?.invalid" class="text-danger">
+              Passport number is required
+            </span>
+          </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="issueDate" id="labelIssueDate" class="col-sm-2 col-form-label">
+              Issue Date <span class="text-danger">*</span>
+            </label>
+            <div class="col-sm-10">
+              <div class="input-group" style="display: flex;">
+                <input
+                  type="text"
+                  style="width:auto"
+                  class="form-control"
+                  id="issueDate"
+                  formControlName="issueDate"
+                  name="issueDate"
+                  placeholder="dd/mm/yyyy"
+                  required
+                />
+                <span class="input-group-text">
+                  <span class="material-icons" style="font-size: 17px;">calendar_today</span>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="validUpto" id="labelValidUpto" class="col-sm-2 col-form-label">
+              Valid Upto <span class="text-danger">*</span>
+            </label>
+            <div class="col-sm-10">
+              <div class="input-group" style="display: flex;">
+                <input
+                  type="text"
+                  style="width:auto"
+                  class="form-control"
+                  id="validUpto"
+                  formControlName="validUpto"
+                  name="validUpto"
+                  placeholder="dd/mm/yyyy"
+                  required
+                />
+                <span class="input-group-text">
+                  <span class="material-icons" style="font-size: 17px;">calendar_today</span>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="issuedBy" id="labelIssuedBy" class="col-sm-2 col-form-label">
+              Issued By <span class="text-danger">*</span>
+            </label>
+            <div class="col-sm-10">
+            <input type="text" class="form-control" id="inputIssuedBy" formControlName="issuedBy" placeholder="Enter Issued By"/>
+            <span *ngIf="passportDetailsForm.get('issuedBy')?.touched && passportDetailsForm.get('issuedBy')?.invalid" class="text-danger">
+              Issued By is required
+            </span>
+          </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="inputEmigrationCheck" id="labelEmigrationCheck" class="col-sm-2 col-form-label">
+              Emigration Check <span class="text-danger">*</span>
+            </label>
+            <div class="col-sm-10">
+              <select formControlName="emigrationCheck" class="form-select" required>
+                <option value="">Select Emigration Check</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+              </select>
+              <!-- <div *ngIf="f['emigrationCheck'].invalid && f['emigrationCheck'].touched" class="text-danger">
+                Emigration Check is required.
+              </div> -->
+            </div>
+          </div>
+           <!-- <hr /> -->
+           <div class="mb-3 row">
+            <div class="col-sm-12 text-center">
+          <button class="submit_btn" (click)="goToPrevious()">Previous</button>
+          <button class="submit_btn" (click)="goToNext()">Next</button>
+          </div>
+          </div>
+
+        </div>
+      </form>
+      <form [formGroup] ="healthDetailsForm">
+        <div *ngIf = "currentStep === 3">
+          <h4 class="text-center">Health Details</h4>
+
+          <div class="mb-3 row">
+            <label for="inputVision" id="labelVision" class="col-sm-2 col-form-label">
+              Vision <span class="text-danger">*</span>
+            </label>
+            <div class="col-sm-10 pt-1">
+              <div class="form-check form-check-inline">
+                <input type="radio" name="vision" id="InputVisionLeft" formControlName="vision" value="Left" class="form-check-input" required
+                />
+                <label class="form-check-label" for="visionLeft">Left</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input type="radio" name="vision" id="InputVisionRight" formControlName="vision" value="Right" class="form-check-input" required
+                />
+                <label class="form-check-label" for="visionRight">Right</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input type="radio" name="vision" id="InputVisionNo" formControlName="vision" value="No" class="form-check-input" required
+                />
+                <label class="form-check-label" for="visionNo">No</label>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="inputDiabetes" id="labelDiabetes" class="col-sm-2 col-form-label">
+              Diabetes <span class="text-danger">*</span>
+            </label>
+            <div class="col-sm-10 pt-1">
+              <div class="form-check form-check-inline">
+                <input type="radio" name="diabetes" id="InputDiabetesYes" formControlName="diabetes" value="Yes" class="form-check-input" required
+                />
+                <label class="form-check-label" for="diabetesYes">YES</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input type="radio" name="diabetes" id="InputDiabetesNo" formControlName="diabetes" value="No" class="form-check-input" required
+                />
+                <label class="form-check-label" for="diabetesNo">NO</label>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="inputBloodPressure" id="labelBloodPressure" class="col-sm-2 col-form-label">
+              Blood Press.(High/Low) <span class="text-danger">*</span>
+            </label>
+            <div class="col-sm-10 pt-1">
+              <div class="form-check form-check-inline">
+                <input type="radio" name="bloodPressure" id="InputBloodPressureYes" formControlName="bloodPressure" value="Yes" class="form-check-input" required
+                />
+                <label class="form-check-label" for="visionYes">YES</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input type="radio" name="bloodPressure" id="InputBloodPressureNo" formControlName="bloodPressure" value="No" class="form-check-input" required
+                />
+                <label class="form-check-label" for="visionNo">NO</label>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="inputHeartAliments" id="labelHeartAliments" class="col-sm-2 col-form-label">
+              Heart Aliments <span class="text-danger">*</span>
+            </label>
+            <div class="col-sm-10 pt-1">
+              <div class="form-check form-check-inline">
+                <input type="radio" name="heartAliments" id="InputHeartAlimentsYes" formControlName="heartAliments" value="Yes" class="form-check-input" required
+                />
+                <label class="form-check-label" for="visionYes">YES</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input type="radio" name="heartAliments" id="InputHeartAlimentsNo" formControlName="heartAliments" value="No" class="form-check-input" required
+                />
+                <label class="form-check-label" for="visionNo">NO</label>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="inputOtherIllness" id="labelOtherIllness" class="col-sm-2 col-form-label">
+              Other Illness <span class="text-danger">*</span>
+            </label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="inputOtherIllness" formControlName="otherIllness" placeholder="Enter details" required />
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="inputLastMajorIllness" id="labelLastMajorIllness" class="col-sm-2 col-form-label">
+              Last Major Illness <span class="text-danger">*</span>
+            </label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="inputLastMajorIllness" formControlName="lastMajorIllness" placeholder="Enter details" required />
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="lastMajorIllnessDate" id="labelLastMajorIllnessDate" class="col-sm-2 col-form-label">
+              Last Major Illness Date <span class="text-danger">*</span>
+            </label>
+            <div class="col-sm-10">
+              <div class="input-group" style="display: flex;">
+                <input
+                  type="text"
+                  style="width:auto"
+                  class="form-control"
+                  id="lastMajorIllnessDate"
+                  formControlName="lastMajorIllnessDate"
+                  name="lastMajorIllnessDate"
+                  placeholder="dd/mm/yyyy"
+                  required
+                />
+                <span class="input-group-text">
+                  <span class="material-icons" style="font-size: 17px;">calendar_today</span>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="inputBloodGroup" id="labelBloodGroup" class="col-sm-2 col-form-label">
+              Blood Group <span class="text-danger">*</span>
+            </label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="inputBloodGroup" formControlName="bloodGroup" placeholder="Enter blood group" required />
+            </div>
+          </div>
+
+           <!-- <hr /> -->
+           <div class="mb-3 row">
+            <div class="col-sm-12 text-center">
+          <button class="submit_btn" (click)="goToPrevious()">Previous</button>
+          <button class="submit_btn" (click)="goToNext()">Next</button>
+          </div>
+          </div>
+
+        </div>
+      </form>
+      <form [formGroup] ="addressForm">
+        <div *ngIf = "currentStep === 4">
+          <h4 class="text-center">Address Details</h4>
+          <!-- Permanent Address -->
+          <div class="mb-3 row">
             <label for="inputPermanentAddress" id="labelPermanentAddress" class="col-sm-2 col-form-label">{{labels.labelPermanentAddress}}<span class="text-danger">*</span></label>
             <div class="col-sm-10">
               <textarea formControlName="permanentAddress" class="form-control" placeholder="Enter your permanent address" required></textarea>
-              <span class="text-danger" *ngIf="f['permanentAddress'].invalid && f['permanentAddress'].touched">permanentAddress is required</span>
             </div>
           </div>
           <div class="mb-3 row">
             <label for="inputPermanentPincode" id="labelPincode" class="col-sm-2 col-form-label">{{labels.labelPincode}}<span class="text-danger">*</span></label>
             <div class="col-sm-10">
-              <input type="text" class="form-control" id="inputPermanentPincode" formControlName="PinCode" placeholder="Enter pincode" maxlength="6" minlength="6" pattern="[0-9]{6}" required>
-              <span class="text-danger" *ngIf="f['PinCode'].invalid && f['PinCode'].touched">PinCode is required</span>
+              <input type="text" class="form-control" id="inputPermanentPincode" formControlName="pinCode" placeholder="Enter pincode" maxlength="6" minlength="6" pattern="[0-9]{6}" required>
+
             </div>
           </div>
           <div class="mb-3 row">
@@ -103,6 +349,7 @@
               </select>
             </div>
           </div>
+
           <div class="mb-3 row">
             <label for="inputPermanentDistrict" class="col-sm-2 col-form-label" id="labelDistrict">{{labels.labelDistrict}}<span class="text-danger">*</span></label>
             <div class="col-sm-10">
@@ -112,20 +359,194 @@
               </select>
             </div>
           </div>
+
           <div class="mb-3 row">
-            <label for="inputName" id="labelKeySkills" class="col-sm-2 col-form-label">{{labels.labelKeySkills}}<span class="text-danger">*</span></label>
-            <div class="col-sm-10">
-              <input type="text" formControlName="KeySkills" class="form-control" placeholder="Enter your KeySkills" required>
-              <span class="text-danger" *ngIf="f['KeySkills'].invalid && f['KeySkills'].touched">KeySkills is required</span>
+            <div class="col-sm-10 offset-sm-2">
+              <input type="checkbox"
+                     id="copyAddress"
+                     formControlName="copyAddress"
+                     (change)="onCopyAddressChange($event)" />
+              <label for="copyAddress" id="labelcopyAddress">{{labels.labelcopyAddress}}</label>
             </div>
           </div>
+
+          <!-- Correspondence Address Fields -->
           <div class="mb-3 row">
+            <label for="inputCorrespondenceAddress" id="labelCorrespondenceAddress" class="col-sm-2 col-form-label">{{labels.labelCorrespondenceAddress}}</label>
+            <div class="col-sm-10">
+              <textarea type="text" id="inputCorrespondenceAddress" class="form-control" formControlName="cAddress" placeholder="Enter your correspondence address"></textarea>
+            </div>
+          </div>
+
+          <div class="mb-3 row">
+            <label for="inputCorrespondencePincode" id="labelCPinCode" class="col-sm-2 col-form-label">{{labels.labelCPinCode}}</label>
+            <div class="col-sm-10">
+              <input type="text" id="inputCorrespondencePincode" class="form-control" formControlName="cPinCode" placeholder="Enter pincode" />
+            </div>
+          </div>
+
+          <div class="mb-3 row">
+            <label for="inputCorrespondenceState" id="labelCStateId" class="col-sm-2 col-form-label">{{labels.labelCStateId}}</label>
+            <div class="col-sm-10">
+              <select class="form-select" id="inputCorrespondenceState" formControlName="cStateId" (change)="onStateChange($event, 'correspondence')" required>
+                <option value="0" disabled>Select State</option>
+                <option *ngFor="let state of states" [value]="state.id">{{ state.name }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-3 row">
+            <label for="inputCorrespondenceDistrict" id="labelCDistrict" class="col-sm-2 col-form-label">{{labels.labelCDistrict}}</label>
+            <div class="col-sm-10">
+              <select class="form-select" id="inputCorrespondenceDistrict" formControlName="cDistrictId" required>
+                <option value="0" selected disabled>Select District</option>
+                <option *ngFor="let district of districtsForCorrespondenceState" [value]="district.id">{{ district.name }}</option>
+              </select>
+            </div>
+          </div>
+
+           <!-- <hr /> -->
+           <div class="mb-3 row">
             <div class="col-sm-12 text-center">
+          <button class="submit_btn" (click)="goToPrevious()">Previous</button>
           <button class="submit_btn" (click)="goToNext()">Next</button>
           </div>
           </div>
+
         </div>
-        <div *ngIf ="currentStep === 2">
+      </form>
+      <!-- <form [formGroup]="languageForm">
+        <div *ngIf="currentStep === 5">
+          <h4 class="text-center">Language Details</h4>
+          
+          <div formArrayName="languages">
+            <div *ngFor="let language of languages.controls; let i = index"
+                 [formGroupName]="i"
+                 class="language-tab">
+                 <div class="mb-3 row">
+                  <label for="language-{{i}}" class="col-sm-2 col-form-label dis-table">Language<span class="text-danger">*</span></label>
+                  <div class="col-sm-10">
+                    <input type="text" formControlName="language" class="form-control" placeholder="Enter Language" />
+                    <span class="text-danger" *ngIf="language.get('language')?.hasError('required') && language.get('language')?.touched">
+                      Language is required.
+                    </span>
+                  </div>
+                </div>
+                <div class="mb-3 row">
+                  <label class="col-sm-2 col-form-label">Understand</label>
+                  <div class="col-sm-10">
+                    <input type="checkbox" formControlName="understand" />
+                  </div>
+                </div>
+        
+                <div class="mb-3 row">
+                  <label class="col-sm-2 col-form-label">Read</label>
+                  <div class="col-sm-10">
+                    <input type="checkbox" formControlName="read" />
+                  </div>
+                </div>
+        
+                <div class="mb-3 row">
+                  <label class="col-sm-2 col-form-label">Write</label>
+                  <div class="col-sm-10">
+                    <input type="checkbox" formControlName="write" />
+                  </div>
+                </div>
+        
+                <div class="mb-3 row">
+                  <label class="col-sm-2 col-form-label">Speak</label>
+                  <div class="col-sm-10">
+                    <input type="checkbox" formControlName="speak" />
+                  </div>
+                </div>
+
+              <div class="text-end">
+                <div class="d-inline-block me-2">
+                  <a type="button" (click)="addlanguageTab(i)" *ngIf="i === languages.length - 1">
+                    <span class="material-icons" style="font-size: 17px;">add_circle</span>
+                  </a>
+                </div>
+                <div class="d-inline-block">
+                  <a *ngIf="i > 0" type="button" (click)="removelanguageTab(i)">
+                    <span class="material-icons" style="font-size: 17px;">delete</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+      
+          <div class="mb-3 row">
+            <div class="col-sm-12 text-center">
+              <button class="submit_btn" (click)="goToPrevious()">Previous</button>
+              <button class="submit_btn" (click)="goToNext()">Next</button>
+            </div>
+          </div>
+        </div>
+      </form> -->
+      
+      <form [formGroup]="languageForm">
+        <div *ngIf="currentStep === 5">
+          <h4 class="text-center">Language Details</h4>
+          <div formArrayName="languages">
+            <table class="table table-borderless">
+              <thead class="text-center">
+                <tr>
+                  <th>Language<span class="text-danger">*</span></th>
+                  <th>Understand</th>
+                  <th>Read</th>
+                  <th>Write</th>
+                  <th>Speak</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let language of languages.controls; let i = index" [formGroupName]="i">
+                  <td>
+                    <input 
+                      type="text" 
+                      formControlName="language" 
+                      class="form-control" 
+                      placeholder="Enter Language" 
+                    />
+                    <span class="text-danger" *ngIf="language.get('language')?.hasError('required') && language.get('language')?.touched">
+                      Language is required.
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <input type="checkbox" formControlName="understand" />
+                  </td>
+                  <td class="text-center">
+                    <input type="checkbox" formControlName="read" />
+                  </td>
+                  <td class="text-center">
+                    <input type="checkbox" formControlName="write" />
+                  </td>
+                  <td class="text-center">
+                    <input type="checkbox" formControlName="speak" />
+                  </td>
+                  <td class="text-center">
+                    <a type="button" (click)="addlanguageTab(i)" *ngIf="i === languages.length - 1">
+                      <span class="material-icons" style="font-size: 17px;">add_circle</span>
+                    </a>
+                    <a *ngIf="i > 0" type="button" (click)="removelanguageTab(i)">
+                      <span class="material-icons" style="font-size: 17px;">delete</span>
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="mb-3 row">
+            <div class="col-sm-12 text-center">
+              <button class="submit_btn" (click)="goToPrevious()">Previous</button>
+              <button class="submit_btn" (click)="goToNext()">Next</button>
+            </div>
+          </div>
+        </div>
+      </form>
+      
+      <form [formGroup] ="experienceDetailForm">
+        <div *ngIf ="currentStep === 6">
           <h4 class="text-center">{{labels.labelExperience}}</h4>
           <!-- <hr /> -->
           <div formArrayName="experiences">
@@ -229,8 +650,17 @@
           </div>
           </div>
         </div>
-        <div *ngIf ="currentStep === 3">
-          <h4 class="text-center">Upload File</h4>
+      </form>
+      <form [formGroup] ="QualificationForm">
+        <div *ngIf ="currentStep === 7">
+          <h4 class="text-center">Qualification Details</h4>
+          <div class="mb-3 row">
+            <label for="inputName" id="labelKeySkills" class="col-sm-2 col-form-label">{{labels.labelKeySkills}}<span class="text-danger">*</span></label>
+            <div class="col-sm-10">
+              <input type="text" formControlName="KeySkills" class="form-control" placeholder="Enter your KeySkills" required>
+              <span class="text-danger" *ngIf="f['KeySkills'].invalid && f['KeySkills'].touched">KeySkills is required</span>
+            </div>
+          </div>
           <div class="mb-3 row" style="margin-top: 1rem;">
             <label for="inputResume" class="col-sm-2 col-form-label">{{ labels.labelResume }} <span class="text-danger" *ngIf="position === 'Superviser'">*</span></label>
             <div class="col-sm-10">
@@ -247,7 +677,7 @@
             </div>
           </div>
         </div>
-        </form>
+      </form>
       </div>
     </div>
   </div>

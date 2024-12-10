@@ -44,7 +44,7 @@ export class SendOTPComponent {
   }
 
   onSubmit(): void {
-    debugger;
+    // debugger;
     if (this.signupForm.valid && this.captchaIsValid) {
       this.SendOtpmodel = {
         mobileNo: this.signupForm.value.whatsappNumber,
@@ -57,7 +57,15 @@ export class SendOTPComponent {
         (result: any) => {
           if (result.status == 200) {
             sessionStorage.setItem('MobileNo', JSON.stringify(this.SendOtpmodel.mobileNo));
-            this.router.navigate(['/verifyotp'])
+            Swal.fire({
+              title: "OTP Sent Successfully",
+              text: "Please save this OTP for future reference, as you'll need it to edit your profile.",
+              icon: "success",
+              confirmButtonText: "OK"
+            }).then(() => {
+              // Navigate to OTP verification after user clicks "OK"
+              this.router.navigate(['/verifyotp']);
+            });
           }
         },
         (error: any) => {

@@ -7,7 +7,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { District, LanguageLabels, State } from '../../../Models/JobApplication/language-labels';
-import { Experience, JobApplicationFormRequest, JobApplicationFormRequestIO, Language, Resume } from '../../../Models/JobApplication/job-application-form-request';
+import { Experience, JobApplicationFormRequest, JobApplicationFormRequestIO, Language, Qualification, Resume } from '../../../Models/JobApplication/job-application-form-request';
 import { JobApplicationService } from '../../../Services/JobApplication/job-application.service';
 import { switchMap } from 'rxjs';
 
@@ -106,6 +106,7 @@ export class JobApplicationITOilComponent {
       languages: this.fb.array([this.createLanguageTab()])
     });
     this.QualificationForm = this.fb.group({
+      qualifications: this.fb.array([this.createQualificationTab()]),
       resumeFile: ['', Validators.required],
       KeySkills: ['', Validators.required],
     });
@@ -180,8 +181,15 @@ export class JobApplicationITOilComponent {
         write: lang.write,
         speak: lang.speak
       }))
+      const qualifications: Qualification[] = this.jobApplicationForm.value.qualifications.map((qual: any) => ({
+        qualification: qual.qualification,
+        subject: qual.subject,
+        passingYear: qual.passingYear,
+        uploadImage: qual.uploadImage 
+      }))
       this.applicationData.ExpDtl = experiences;
       this.applicationData.languageDtl = languages;
+      this.applicationData.qualificationDtl = qualifications;
       this.resumeModel.mobileNo = this.applicationData.mobileNo;
       this.jobappservice.submitApplicationIO(this.applicationData).pipe(
         switchMap((result: any) => {
@@ -211,6 +219,8 @@ export class JobApplicationITOilComponent {
       );
     }
   }
+
+  
 
   goToNext(): void {
     if (this.currentStep < 7) {
@@ -376,6 +386,27 @@ export class JobApplicationITOilComponent {
     );
   }
 
+  get qualifications(): FormArray {
+    return this.QualificationForm.get('qualifications') as FormArray;
+  }
+
+  createQualificationTab(): FormGroup {
+    return this.fb.group({
+      qualification: ['', Validators.required],
+      subject: ['', Validators.required],
+      passingYear: ['', Validators.required],
+      uploadImage: ['', Validators.required],
+    });
+  }
+  addQualicationTab(index: number): void {
+    this.qualifications.push(this.createQualificationTab());
+  }
+  removeQualicationTab(index: number): void {
+    if (this.qualifications.length > 1) {
+      this.qualifications.removeAt(index);
+    }
+  }
+
   get languages(): FormArray {
     return this.languageForm.get('languages') as FormArray;
   }
@@ -415,12 +446,12 @@ export class JobApplicationITOilComponent {
   }
   addTab(index: number): void {
     this.experiences.push(this.createExperienceTab());
-    this.initializeDatepickers();
+    // this.initializeDatepickers();
   }
   removeTab(index: number): void {
     if (this.experiences.length > 1) {
       this.experiences.removeAt(index);
-      this.initializeDatepickers();
+      // this.initializeDatepickers();
     }
   }
   saveExperience(index: number) {
@@ -429,42 +460,97 @@ export class JobApplicationITOilComponent {
   }
 
   ngAfterViewInit(): void {
-    $('#datepicker').datepicker({
-      format: 'dd/mm/yyyy',
-      autoclose: true,
-      todayHighlight: true,
-    })
-      .on('changeDate', (e: any) => {
-        const selectedDate = e.format('dd/mm/yyyy');
-        this.jobApplicationForm.patchValue({ dateOfBirth: selectedDate });
-      });
+    // $('#datepicker').datepicker({
+    //   format: 'dd/mm/yyyy',
+    //   autoclose: true,
+    //   todayHighlight: true,
+    // })
+    //   .on('changeDate', (e: any) => {
+    //     const selectedDate = e.format('dd/mm/yyyy');
+    //     this.jobApplicationForm.patchValue({ dateOfBirth: selectedDate });
+    //   });
+     // Use a timeout to ensure the DOM is ready
+    //  setTimeout(() => {
+    //   if ($('#lastMajorIllnessDate').length > 0) {
+    //     console.log("last major illness date initialized");
+    //     $('#lastMajorIllnessDate').datepicker({
+    //       format: 'dd/mm/yyyy',
+    //       autoclose: true,
+    //       todayHighlight: true,
+    //     }).on('changeDate', (e: any) => {
+    //       const selectedDate = e.format('dd/mm/yyyy');
+    //       this.healthDetailsForm.patchValue({ lastMajorIllnessDate: selectedDate });
+    //     });
+    //   }  else {
+    //     console.error('#lastMajorIllnessDate not found in DOM');
+    //   }
+    //   if ($('#issueDate').length > 0) {
+    //     console.log("issue date initialized")
+    //     $('#issueDate').datepicker({
+    //       format: 'dd/mm/yyyy',
+    //       autoclose: true,
+    //       todayHighlight: true,
+    //     }).on('changeDate', (e: any) => {
+    //       const selectedDate = e.format('dd/mm/yyyy');
+    //       this.passportDetailsForm.patchValue({ issueDate: selectedDate });
+    //     });
+    //   }
+    //   else {
+    //     console.error('#issed date not found in DOM');
+    //   }
+    // }, 500);
 
     
-    this.initializeDatepickers();
+    // this.initializeDatepickers();
   }
-  initializeDatepickers() {
-    setTimeout(() => {
-      this.experiences.controls.forEach((experience, index) => {
-        $(`#datepicker1-${index}`).datepicker({
-          format: 'dd/mm/yyyy',
-          autoclose: true,
-          todayHighlight: true,
-        }).on('changeDate', (e: any) => {
-          const selectedFromDate = e.format('yyyy-mm-dd');
-          experience.patchValue({ fromDate: selectedFromDate });
-        });
+  // Add AfterViewChecked to ensure datepicker initializes properly after view has been rendered
+  ngAfterViewChecked(): void {
+    this.initializeDatepicker('#lastMajorIllnessDate', this.healthDetailsForm, 'lastMajorIllnessDate');
+    this.initializeDatepicker('#issueDate', this.passportDetailsForm, 'issueDate');
+    this.initializeDatepicker('#validUpto', this.passportDetailsForm, 'validUpto');
+    this.initializeDatepicker('#datepicker1', this.experienceDetailForm, 'datepicker1');
+    this.initializeDatepicker('#datepicker2', this.experienceDetailForm, 'datepicker2');
+    this.initializeDatepicker('#datepicker', this.jobApplicationForm, 'datepicker');
+    
+  }
 
-        $(`#datepicker2-${index}`).datepicker({
-          format: 'dd/mm/yyyy',
-          autoclose: true,
-          todayHighlight: true,
-        }).on('changeDate', (e: any) => {
-          const selectedToDate = e.format('yyyy-mm-dd');
-          experience.patchValue({ toDate: selectedToDate });
-        });
+  private initializeDatepicker(elementId: string, formGroup: any, controlName: string): void {
+    const element = $(elementId);
+    if (element.length > 0) {
+      console.log(`${controlName} initialized`);
+      element.datepicker({
+        format: 'dd/mm/yyyy',
+        autoclose: true,
+        todayHighlight: true,
+      }).on('changeDate', (e: any) => {
+        const selectedDate = e.format('dd/mm/yyyy');
+        formGroup.patchValue({ [controlName]: selectedDate });
       });
-    }, 0);
+    } 
   }
+  // initializeDatepickers() {
+  //   setTimeout(() => {
+  //     this.experiences.controls.forEach((experience, index) => {
+  //       $(`#datepicker1-${index}`).datepicker({
+  //         format: 'dd/mm/yyyy',
+  //         autoclose: true,
+  //         todayHighlight: true,
+  //       }).on('changeDate', (e: any) => {
+  //         const selectedFromDate = e.format('yyyy-mm-dd');
+  //         experience.patchValue({ fromDate: selectedFromDate });
+  //       });
+
+  //       $(`#datepicker2-${index}`).datepicker({
+  //         format: 'dd/mm/yyyy',
+  //         autoclose: true,
+  //         todayHighlight: true,
+  //       }).on('changeDate', (e: any) => {
+  //         const selectedToDate = e.format('yyyy-mm-dd');
+  //         experience.patchValue({ toDate: selectedToDate });
+  //       });
+  //     });
+  //   }, 50);
+  // }
   onCopyAddressChange(event: any): void {
     if (event.target.checked) {
       this.jobApplicationForm.patchValue({

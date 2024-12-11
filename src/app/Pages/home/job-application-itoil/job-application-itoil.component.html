@@ -95,7 +95,7 @@
           </div>
         </div>
       </form>
-      <form [formGroup] ="passportDetailsForm">
+      <form *ngIf="passportDetailsForm" [formGroup] ="passportDetailsForm">
         <div *ngIf = "currentStep === 2">
           <h4 class="text-center">Passport Details</h4>
           <div class="mb-3 row">
@@ -111,7 +111,7 @@
           </div>
           <div class="mb-3 row">
             <label for="issueDate" id="labelIssueDate" class="col-sm-2 col-form-label">
-              Issue Date <span class="text-danger">*</span>
+              Issued Date <span class="text-danger">*</span>
             </label>
             <div class="col-sm-10">
               <div class="input-group" style="display: flex;">
@@ -189,7 +189,7 @@
 
         </div>
       </form>
-      <form [formGroup] ="healthDetailsForm">
+      <form *ngIf="healthDetailsForm" [formGroup] ="healthDetailsForm">
         <div *ngIf = "currentStep === 3">
           <h4 class="text-center">Health Details</h4>
 
@@ -415,75 +415,6 @@
 
         </div>
       </form>
-      <!-- <form [formGroup]="languageForm">
-        <div *ngIf="currentStep === 5">
-          <h4 class="text-center">Language Details</h4>
-          
-          <div formArrayName="languages">
-            <div *ngFor="let language of languages.controls; let i = index"
-                 [formGroupName]="i"
-                 class="language-tab">
-                 <div class="mb-3 row">
-                  <label for="language-{{i}}" class="col-sm-2 col-form-label dis-table">Language<span class="text-danger">*</span></label>
-                  <div class="col-sm-10">
-                    <input type="text" formControlName="language" class="form-control" placeholder="Enter Language" />
-                    <span class="text-danger" *ngIf="language.get('language')?.hasError('required') && language.get('language')?.touched">
-                      Language is required.
-                    </span>
-                  </div>
-                </div>
-                <div class="mb-3 row">
-                  <label class="col-sm-2 col-form-label">Understand</label>
-                  <div class="col-sm-10">
-                    <input type="checkbox" formControlName="understand" />
-                  </div>
-                </div>
-        
-                <div class="mb-3 row">
-                  <label class="col-sm-2 col-form-label">Read</label>
-                  <div class="col-sm-10">
-                    <input type="checkbox" formControlName="read" />
-                  </div>
-                </div>
-        
-                <div class="mb-3 row">
-                  <label class="col-sm-2 col-form-label">Write</label>
-                  <div class="col-sm-10">
-                    <input type="checkbox" formControlName="write" />
-                  </div>
-                </div>
-        
-                <div class="mb-3 row">
-                  <label class="col-sm-2 col-form-label">Speak</label>
-                  <div class="col-sm-10">
-                    <input type="checkbox" formControlName="speak" />
-                  </div>
-                </div>
-
-              <div class="text-end">
-                <div class="d-inline-block me-2">
-                  <a type="button" (click)="addlanguageTab(i)" *ngIf="i === languages.length - 1">
-                    <span class="material-icons" style="font-size: 17px;">add_circle</span>
-                  </a>
-                </div>
-                <div class="d-inline-block">
-                  <a *ngIf="i > 0" type="button" (click)="removelanguageTab(i)">
-                    <span class="material-icons" style="font-size: 17px;">delete</span>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-      
-          <div class="mb-3 row">
-            <div class="col-sm-12 text-center">
-              <button class="submit_btn" (click)="goToPrevious()">Previous</button>
-              <button class="submit_btn" (click)="goToNext()">Next</button>
-            </div>
-          </div>
-        </div>
-      </form> -->
-      
       <form [formGroup]="languageForm">
         <div *ngIf="currentStep === 5">
           <h4 class="text-center">Language Details</h4>
@@ -572,13 +503,13 @@
                 </div>
               </div>
               <div class="mb-3 row">
-                <label for="datepicker1-{{i}}" id="labelFromDate" class="col-sm-2 col-form-label">{{labels.labelFromDate}}<span class="text-danger">*</span></label>
+                <label for="datepicker1" id="labelFromDate" class="col-sm-2 col-form-label">{{labels.labelFromDate}}<span class="text-danger">*</span></label>
                 <div class="col-sm-10">
                   <div class="input-group" style="display: flex">
                     <input type="text"
                            style="width:auto"
                            class="form-control"
-                           id="datepicker1-{{i}}" 
+                           id="datepicker1" 
                     formControlName="fromDate"
                     name="fromDate"
                     placeholder="dd/mm/yyyy"
@@ -590,13 +521,13 @@
                 </div>
               </div>
               <div class="mb-3 row">
-                <label for="datepicker2-{{i}}" id="labelToDate" class="col-sm-2 col-form-label">{{labels.labelToDate}}<span class="text-danger">*</span></label>
+                <label for="datepicker2" id="labelToDate" class="col-sm-2 col-form-label">{{labels.labelToDate}}<span class="text-danger">*</span></label>
                 <div class="col-sm-10">
                   <div class="input-group" style="display: flex">
                     <input type="text"
                            style="width:auto"
                            class="form-control"
-                           id="datepicker2-{{i}}"
+                           id="datepicker2"
                     formControlName="toDate"
                     name="toDate"
                     placeholder="dd/mm/yyyy"
@@ -653,23 +584,89 @@
       </form>
       <form [formGroup] ="QualificationForm">
         <div *ngIf ="currentStep === 7">
-          <h4 class="text-center">Qualification Details</h4>
-          <div class="mb-3 row">
-            <label for="inputName" id="labelKeySkills" class="col-sm-2 col-form-label">{{labels.labelKeySkills}}<span class="text-danger">*</span></label>
-            <div class="col-sm-10">
-              <input type="text" formControlName="KeySkills" class="form-control" placeholder="Enter your KeySkills" required>
-              <span class="text-danger" *ngIf="f['KeySkills'].invalid && f['KeySkills'].touched">KeySkills is required</span>
-            </div>
-          </div>
-          <div class="mb-3 row" style="margin-top: 1rem;">
-            <label for="inputResume" class="col-sm-2 col-form-label">{{ labels.labelResume }} <span class="text-danger" *ngIf="position === 'Superviser'">*</span></label>
-            <div class="col-sm-10">
-              <input type="file" class="form-control" [formControlName]="'resumeFile'" accept=".pdf,.jpg,.jpeg,.png" (change)="onFileChange($event, 'resumeFile')">
-              <div *ngIf="f['resumeFile'].invalid && f['resumeFile'].touched" class="text-danger">
-                This file input is required.
+          <h4 class="text-center">Qualification details</h4>
+          <!-- <hr /> -->
+          <div formArrayName="qualifications">
+            <div *ngFor="let qualification of qualifications.controls; let i = index"
+                 [formGroupName]="i"
+                 class="qualification-tab">              
+             
+                 <div class="mb-3 row">
+                  <label for="inputQualifications" id="labelQualifications" class="col-sm-2 col-form-label">Qualifications<span class="text-danger">*</span></label>
+                  <div class="col-sm-10">
+                    <select formControlName="qualification" class="form-select" required>
+                      <option value="">Select Qualifications</option>
+                      <option value="Graduation">Graduation</option>
+                      <option value="Post Graduation">Post Graduation</option>
+                      <option value="Diploma">Diploma</option>
+                      <option value="Others">Others</option>
+                    </select>
+                  </div>
+                </div>
+              <div class="mb-3 row">
+                <label for="inputSubject" id="labelSubject" class="col-sm-2 col-form-label">Subject</label>
+                <div class="col-sm-10">
+                  <input type="text" formControlName="subject" class="form-control" placeholder="Enter Subject" required>
+                </div>
+              </div>
+              <div class="mb-3 row">
+                <label for="passingYear" id="labelpassingYear" class="col-sm-2 col-form-label">Passing Year<span class="text-danger">*</span></label>
+                <div class="col-sm-10">
+                  <div class="input-group" style="display: flex">
+                    <input type="text"
+                           style="width:auto"
+                           class="form-control"
+                           id="passingYear"
+                    formControlName="passingYear"
+                    name="passingYear"
+                    placeholder="dd/mm/yyyy"
+                    required />
+                    <span class="input-group-text">
+                      <span class="material-icons" style="font-size: 17px;">calendar_today</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="mb-3 row" style="margin-top: 1rem;">
+                <label for="inputUploadImage" class="col-sm-2 col-form-label">Upload Image <span class="text-danger">*</span></label>
+                <div class="col-sm-10">
+                  <input type="file" class="form-control" [formControlName]="'uploadImage'" accept=".pdf,.jpg,.jpeg,.png" (change)="onFileChange($event, 'resumeFile')">
+                  <!-- <div *ngIf="f['uploadImage'].invalid && f['uploadImage'].touched" class="text-danger">
+                    This file input is required.
+                  </div> -->
+                </div>
+              </div>
+              <div class="text-end">
+                <div class="d-inline-block me-2">
+                  <a type="button" (click)="addQualicationTab(i)" *ngIf="i === qualifications.length - 1">
+                    <span class="material-icons" style="font-size: 17px;">add_circle</span>
+                  </a>
+                </div>
+                <div class="d-inline-block">
+                  <a *ngIf="i > 0" type="button" (click)="removeQualicationTab(i)">
+                    <span class="material-icons" style="font-size: 17px;">delete</span>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
+
+          <div class="mb-3 mt-2 row">
+            <label for="inputName" id="labelKeySkills" class="col-sm-2 col-form-label">{{labels.labelKeySkills}}<span class="text-danger">*</span></label>
+            <div class="col-sm-10">
+              <input type="text" formControlName="KeySkills" class="form-control" placeholder="Enter your KeySkills" required>
+            </div>
+          </div>
+          <div class="mb-3 row" style="margin-top: 1rem;">
+            <label for="inputResume" class="col-sm-2 col-form-label">{{ labels.labelResume }} <span class="text-danger">*</span></label>
+            <div class="col-sm-10">
+              <input type="file" class="form-control" [formControlName]="'resumeFile'" accept=".pdf,.jpg,.jpeg,.png" (change)="onFileChange($event, 'resumeFile')">
+              <!-- <div *ngIf="f['resumeFile'].invalid && f['resumeFile'].touched" class="text-danger">
+                This file input is required.
+              </div> -->
+            </div>
+          </div>
+          <!-- <hr /> -->
           <div class="mb-3 row">
             <div class="col-sm-12 text-center">
               <button class="submit_btn" (click)="goToPrevious()">Previous</button>
@@ -678,6 +675,8 @@
           </div>
         </div>
       </form>
+      
+      
       </div>
     </div>
   </div>

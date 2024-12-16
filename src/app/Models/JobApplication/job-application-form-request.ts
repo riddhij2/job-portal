@@ -36,8 +36,6 @@ export class JobApplicationFormRequest {
   'fatherMobileNo': string;
 }
 
-
-
 export class JobApplicationFormRequestIO {
   'FacebookId': string;
   'gender': string;
@@ -56,6 +54,8 @@ export class JobApplicationFormRequestIO {
   'dateOfBirth': string;
   'ExpDtl': Experience[];
   'languageDtl': Language[];
+  'qualificationDtl': Qualification[];
+  'skillDtl': Skill[];
 }
 
 export class Experience {
@@ -73,10 +73,86 @@ export class Resume {
 }
 
 export class Language {
-  'language': string;
+  'languageName': string;
   'understand': boolean;
   'read': boolean;
   'write': boolean;
-  'speak': boolean;
+  'speek': boolean;
+}
+
+export class Qualification{
+  'MobileNo': string;
+  'OrderNo': number;
+  'DegreeName': string;
+  'Specialization': string;
+  'PassingYear': string;
+  'imageFile': File;
+}
+export class RemoveQualDetail{
+  'mobileNo': string;
+  'orderNo': number;
+}
+export class Skill{
+  'skillName': string;
+  'softwareVerson': string;
+  'lastUsed': number;
+  'experienceYear': number;
+  'experienceMonth': number;
+}
+export class BasicDetail {
+  'fName': string;
+  'mName': string;
+  'lName': string;
+  'fatherName': string;
+  'fatherMobileNo': string;
+  'nationality': string;
+  'vehicleType': string;
+  'drivingLicenseNo': string;
+  'dateOfBirth': string;
+  'gender': string;
+  'maritalStatus': string;
+  'emailAddress': string;
+  'mobileNo': string;
+  'Photofile': File;
+}
+export class SkillDetail {
+  'mobileNo': string;
+  'skillDtl': Skill[];
+}
+export class AddressDetail {
+  'mobileNo': string;
+  'permanentAddress': string;
+  'pinCode': string;
+  'stateId': number
+  'districtId': number
+  'correspondenceAddress': string;
+  'cPinCode': string;
+  'cStateId': number
+  'cDistrictId': number
+}
+export class HealthDetail {
+  'mobileNo': string;
+  'vision': string;
+  'bloodPressure': string;
+  'diabetes': string;
+  'heartAilments': string;
+  'anyOtherIllnes': string;
+  'lastMajorIllness': string;
+  'majoreIllnessDate': string;
+  'bloodGroop': string;
+}
+export class PassportDetail {
+  'mobileNo': string;
+  'passportNo': string;
+  'dateOfIssue': string;
+  'validUpto': string;
+  'issuedBy': string;
+  'passAddress': string;
+  'pCityName': string;
+  'emigrationChecReq': string;
+}
+export class LanguageDetail {
+  'mobileNo': string;
+  'lanDtl': Language[];
 }
 

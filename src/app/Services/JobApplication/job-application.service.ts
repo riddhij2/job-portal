@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/internal/Observable';
 import { environment } from '../../../environments/environment';
-import { AddressDetail, BasicDetail, HealthDetail, JobApplicationFormRequest, JobApplicationFormRequestIO, LanguageDetail, PassportDetail, Qualification, RemoveQualDetail, Resume, SkillDetail } from '../../Models/JobApplication/job-application-form-request';
+import { AddressDetail, BasicDetail, ExperienceDetail, HealthDetail, JobApplicationFormRequest, JobApplicationFormRequestIO, LanguageDetail, PassportDetail, Qualification, RemoveQualDetail, Resume, SkillDetail, SocialDetail } from '../../Models/JobApplication/job-application-form-request';
 import { SendOTPRequest } from '../../Models/SendOTP/send-otprequest';
 import { GlobalService } from '../global/global.service';
 
@@ -41,6 +41,10 @@ export class JobApplicationService {
   }
   getUserDetails(model: SendOTPRequest): Observable<any> {
     let url: string = environment.apiUrl + 'Master/ApplicantDetail';
+    return this.http.post(url, model);
+  }
+  getApplicantDetails(model: HealthDetail): Observable<any> {
+    let url: string = environment.apiUrl + 'Employee/ApplicantDetail';
     return this.http.post(url, model);
   }
   submitApplication(applicationData: JobApplicationFormRequest): Observable<any> {
@@ -137,17 +141,30 @@ export class JobApplicationService {
     let url: string = environment.apiUrl + 'Employee/AddSevenScreen';
     const formData = new FormData();
     formData.append('MobileNo', model.MobileNo || '');
-    formData.append('OrderNo', model.OrderNo.toString() || '');
-    formData.append('DegreeName', model.DegreeName || '');
-    formData.append('Specialization', model.Specialization || '');
-    formData.append('PassingYear', model.PassingYear || '');
-    
+    formData.append('OrderNo', model.orderNo.toString() || '');
+    formData.append('DegreeName', model.degreeName || '');
+    formData.append('Specialization', model.specialization || '');
+    formData.append('PassingYear', model.passingYear || '');
     if (model.imageFile) formData.append('imageFile', model.imageFile);
     return this.http.postWithFiles(url, formData);
   }
   DeleteSevenScreen(model: RemoveQualDetail): Observable<any> {
     const url: string = environment.apiUrl + 'Employee/DeleteSevenScreen';
-    
     return this.http.post(url, model);
+  }
+  AddEightScreen(model: ExperienceDetail): Observable<any> {
+    let url: string = environment.apiUrl + 'Employee/AddEightScreen';
+    return this.http.post(url, model);
+  }
+  AddNineScreen(model: SocialDetail): Observable<any> {
+    let url: string = environment.apiUrl + 'Employee/AddNineScreen';
+    const formData = new FormData();
+    formData.append('MobileNo', model.mobileNo || '');
+    formData.append('FacebookId', model.FacebookId || '');
+    formData.append('LinkdinId', model.LinkdinId || '');
+    formData.append('InstagramId', model.InstagramId || '');
+    formData.append('TwiterId', model.TwiterId || '');
+    if (model.Resumefile) formData.append('Resumefile', model.Resumefile);
+    return this.http.postWithFiles(url, formData);
   }
 }

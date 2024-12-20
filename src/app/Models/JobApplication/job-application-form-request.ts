@@ -36,35 +36,60 @@ export class JobApplicationFormRequest {
   'fatherMobileNo': string;
 }
 
+
+
 export class JobApplicationFormRequestIO {
-  'FacebookId': string;
   'gender': string;
   'PinCode': string;
   'mobileNo': string;
   'maritalStatus': string;
   'permanentAddress': string;
-  'districtId': string;
-  'LinkdinId': string;
+  'pinCode': string;
+  'stateId': number
+  'districtId': number
+  'correspondenceAddress': string;
+  'cPinCode': string;
+  'cStateId': number
+  'cDistrictId': number
+  'linkdinId': string;
   'name': string;
-  'stateId': string;
-  'InstagramId': string;
-  'TwiterId': string;
+  'mName': string;
+  'lName': string;
+  'fatherName': string;
+  'fatherMobileNo': string;
+  'nationality': string;
+  'vehicleType': string;
+  'drivingLicenseNo': string;
   'KeySkills': string;
   'emailAddress': string;
   'dateOfBirth': string;
-  'ExpDtl': Experience[];
-  'languageDtl': Language[];
-  'qualificationDtl': Qualification[];
-  'skillDtl': Skill[];
+  'passportNo': string;
+  'dateOfIssue': string;
+  'validUpto': string;
+  'issuedBy': string;
+  'passAddress': string;
+  'pCityName': string;
+  'emigrationChecReq': string;
+  'facebookId': string;
+  'instagramId': string;
+  'twiterId': string;
+  'resumeFilePath': string;
+  'passportPhotoFilePath': string;
+  'healthDetails': HealthDetail;
+  'experienceDetails': Experience[];
+  'languageDetails': Language[];
+  'qualificationDetails': GetQualification[];
+  'skillDetails': Skill[];
 }
 
 export class Experience {
+  'empExperienceId': number;
   'companyName': string;
-  'joiningDate': string;
-  'relievingDate': string;
+  'startDate': string;
+  'endDate': string;
   'hodName': string;
-  'mobileNo': string;
-  'emailAddress': string;
+  'hodMobile': string;
+  'hodEmail': string;
   'position': string;
 }
 export class Resume {
@@ -73,6 +98,7 @@ export class Resume {
 }
 
 export class Language {
+  'empLanguage_Id': number;
   'languageName': string;
   'understand': boolean;
   'read': boolean;
@@ -80,19 +106,30 @@ export class Language {
   'speek': boolean;
 }
 
-export class Qualification{
+export class Qualification {
+  'qulDtl_Id': number;
   'MobileNo': string;
-  'OrderNo': number;
-  'DegreeName': string;
-  'Specialization': string;
-  'PassingYear': string;
+  'orderNo': number;
+  'degreeName': string;
+  'specialization': string;
+  'passingYear': string;
   'imageFile': File;
 }
-export class RemoveQualDetail{
+export class GetQualification {
+  'qulDtl_Id': number;
+  'MobileNo': string;
+  'orderNo': number;
+  'degreeName': string;
+  'specialization': string;
+  'passingYear': string;
+  'imageFile': string;
+}
+export class RemoveQualDetail {
   'mobileNo': string;
   'orderNo': number;
 }
 export class Skill{
+  'id': number;
   'skillName': string;
   'softwareVerson': string;
   'lastUsed': number;
@@ -100,6 +137,7 @@ export class Skill{
   'experienceMonth': number;
 }
 export class BasicDetail {
+  'applicantId': number;
   'fName': string;
   'mName': string;
   'lName': string;
@@ -114,6 +152,7 @@ export class BasicDetail {
   'emailAddress': string;
   'mobileNo': string;
   'Photofile': File;
+  'passportPhotoFilePath': string;
 }
 export class SkillDetail {
   'mobileNo': string;
@@ -131,15 +170,16 @@ export class AddressDetail {
   'cDistrictId': number
 }
 export class HealthDetail {
+  'empHealth_Id'?: number;
   'mobileNo': string;
-  'vision': string;
-  'bloodPressure': string;
-  'diabetes': string;
-  'heartAilments': string;
-  'anyOtherIllnes': string;
-  'lastMajorIllness': string;
-  'majoreIllnessDate': string;
-  'bloodGroop': string;
+  'vision'?: string;
+  'bloodPressure'?: string;
+  'diabetes'?: string;
+  'heartAilments'?: string;
+  'anyOtherIllnes'?: string;
+  'lastMajorIllness'?: string;
+  'majoreIllnessDate'?: string;
+  'bloodGroop'?: string;
 }
 export class PassportDetail {
   'mobileNo': string;
@@ -155,4 +195,15 @@ export class LanguageDetail {
   'mobileNo': string;
   'lanDtl': Language[];
 }
-
+export class ExperienceDetail {
+  'mobileNo': string;
+  'expDtl': Experience[];
+}
+export class SocialDetail {
+  'mobileNo': string;
+  'FacebookId': string;
+  'LinkdinId': string;
+  'InstagramId': string;
+  'TwiterId': string;
+  'Resumefile': File;
+}

@@ -1,15 +1,16 @@
 import { CommonModule, DatePipe, NgFor, NgIf, TitleCasePipe } from '@angular/common';
 import { Component } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Router, RouterLink } from '@angular/router';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { District, LanguageLabels, State } from '../../../Models/JobApplication/language-labels';
-import { AddressDetail, BasicDetail, Experience, HealthDetail, JobApplicationFormRequest, JobApplicationFormRequestIO, Language, LanguageDetail, PassportDetail, Qualification, RemoveQualDetail, Resume, Skill, SkillDetail } from '../../../Models/JobApplication/job-application-form-request';
+import { AddressDetail, BasicDetail, Experience, ExperienceDetail, HealthDetail, JobApplicationFormRequest, JobApplicationFormRequestIO, Language, LanguageDetail, PassportDetail, Qualification, RemoveQualDetail, Resume, Skill, SkillDetail, SocialDetail } from '../../../Models/JobApplication/job-application-form-request';
 import { JobApplicationService } from '../../../Services/JobApplication/job-application.service';
 import { switchMap } from 'rxjs';
+import { DomSanitizer, SafeResourceUrl, SafeUrl } from '@angular/platform-browser';
 
 declare var Swal: any;
 declare var $: any;
@@ -32,6 +33,7 @@ export class JobApplicationITOilComponent {
   QualificationForm: FormGroup = new FormGroup({});
   experienceDetailForm: FormGroup = new FormGroup({});
   itSkillForm: FormGroup = new FormGroup({});
+  socialForm: FormGroup = new FormGroup({});
   position: string = '';
   labels = new LanguageLabels();
   states: State[] = [];
@@ -39,25 +41,31 @@ export class JobApplicationITOilComponent {
   districtsForCorrespondenceState: District[] = [];
   language = "";
   MobileNo = '';
+  employeeData: JobApplicationFormRequestIO = new JobApplicationFormRequestIO();
   applicationData: BasicDetail = new BasicDetail();
   skillDetail: SkillDetail = new SkillDetail();
   addressDetail: AddressDetail = new AddressDetail();
   healthDetail: HealthDetail = new HealthDetail();
   passportDetail: PassportDetail = new PassportDetail();
   languageDetail: LanguageDetail = new LanguageDetail();
+  experienceDetail: ExperienceDetail = new ExperienceDetail();
   qualificationDetail: Qualification = new Qualification();
-  removeDetail: RemoveQualDetail = new RemoveQualDetail();
+  socialDetail: SocialDetail = new SocialDetail();
   skill: Skill = new Skill();
   lg: Language = new Language();
+  experience: Experience = new Experience();
   resumeModel = new Resume;
-  currentStep: number = 7;
+  currentStep: number = 1;
+  Applicantmodel: HealthDetail = new HealthDetail();
 
   minDate = new Date(2000, 0, 1);
   maxDate = new Date(2020, 0, 1);
   ZoneId = 0;
-  savedTabs: boolean[] = []; 
+  isFormValid = false;
+  savedTabs: boolean[] = [];
+  safeResumeUrl!: SafeResourceUrl;
 
-  constructor(private fb: FormBuilder, private router: Router, private jobappservice: JobApplicationService, private datePipe: DatePipe) { }
+  constructor(private fb: FormBuilder, private router: Router, private jobappservice: JobApplicationService, private datePipe: DatePipe, private sanitizer: DomSanitizer) { }
 
   ngOnInit(): void {
     this.MobileNo = JSON.parse(sessionStorage.getItem('MobileNo') || '')
@@ -80,7 +88,6 @@ export class JobApplicationITOilComponent {
       emailAddress: ['', [Validators.required, Validators.email]],
       mobileNo: [{ value: this.MobileNo, disabled: true }, Validators.required],
       Photofile: ['', Validators.required],
-
     });
     this.addressForm = this.fb.group({
       permanentAddress: ['', Validators.required],
@@ -106,6 +113,7 @@ export class JobApplicationITOilComponent {
       emigrationChecReq: [''],
     });
     this.healthDetailsForm = this.fb.group({
+      empHealth_Id: [0],
       vision: ['No', Validators.required],
       diabetes: ['No', Validators.required],
       bloodPressure: ['No', Validators.required],
@@ -122,10 +130,20 @@ export class JobApplicationITOilComponent {
       qualifications: this.fb.array([this.createQualificationTab()]),
     });
     this.savedTabs.push(false);
-
     this.experienceDetailForm = this.fb.group({
       experiences: this.fb.array([this.createExperienceTab()])
     });
+    this.socialForm = this.fb.group({
+      FacebookId: [''],
+      LinkdinId: [''],
+      InstagramId: [''],
+      TwiterId: [''],
+      Resumefile: ['', Validators.required]
+    });
+    this.socialForm.valueChanges.subscribe(() => {
+      this.checkSocialFormValidity();
+    });
+    this.loadUserData(this.MobileNo);
     this.GetState();
     this.jobApplicationForm.get('stateId')?.setValue(3);
     this.GetCity(3, 'permanent');
@@ -134,31 +152,163 @@ export class JobApplicationITOilComponent {
     this.jobApplicationForm.get('cDistrictId')?.setValue(0);
     this.changeLabels('en');
   }
-  // onStateChange(event: any, type: string): void {
-  //   const selectedStateId = +event.target.value;
-  //   if (selectedStateId) {
-  //     if (type === 'permanent') {
-  //       this.jobApplicationForm.patchValue({
-  //         permanentDistrict: ''
-  //       });
-  //       this.GetCity(selectedStateId, 'permanent');
-  //       this.jobApplicationForm.get('districtId')?.enable();
-  //     } else if (type === 'correspondence') {
-  //       this.jobApplicationForm.patchValue({
-  //         correspondenceDistrict: ''
-  //       });
-  //     }
-  //   } else {
-  //     if (type === 'permanent') {
-  //       this.districtsForState = [];
-  //     } else if (type === 'correspondence') {
-  //       this.districtsForCorrespondenceState = [];
-  //     }
-  //   }
-  // }
+  checkSocialFormValidity() {
+    const facebookId = this.socialForm.get('FacebookId')?.value?.trim();
+    const linkdinId = this.socialForm.get('LinkdinId')?.value?.trim();
+    const instagramId = this.socialForm.get('InstagramId')?.value?.trim();
+    const twiterId = this.socialForm.get('TwiterId')?.value?.trim();
+    const resumeFile = this.socialForm.get('Resumefile')?.value;
+    const isFileSelected = resumeFile === '' ? false : true;
+    this.isFormValid = (facebookId || linkdinId || instagramId || twiterId) && isFileSelected;
+  }
+
+  formatDate(date: string): string {
+    if (!date) {
+      return '';
+    }
+    const d = new Date(date);
+    const day = ('0' + d.getDate()).slice(-2);
+    const month = ('0' + (d.getMonth() + 1)).slice(-2);
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+  loadUserData(mobileno: string): void {
+    this.Applicantmodel = {
+      mobileNo: mobileno,
+    };
+    this.jobappservice.getApplicantDetails(this.Applicantmodel).subscribe((data: any) => {
+      this.employeeData = data.body;
+      // console.log("this.employeeData", this.employeeData)
+      const formattedDateOfBirth = this.formatDate(this.employeeData.dateOfBirth);
+      this.jobApplicationForm.patchValue({
+        fName: this.employeeData.name,
+        mName: this.employeeData.mName,
+        lName: this.employeeData.lName,
+        fatherName: this.employeeData.fatherName,
+        nationality: this.employeeData.nationality,
+        dateOfBirth: formattedDateOfBirth,
+        gender: this.employeeData.gender || 'male',
+        maritalStatus: this.employeeData.maritalStatus || '',
+        emailAddress: this.employeeData.emailAddress,
+        fatherMobileNo: this.employeeData.fatherMobileNo,
+        vehicleType: this.employeeData.vehicleType,
+        drivingLicenseNo: this.employeeData.drivingLicenseNo,
+        PhotofileUrl: this.employeeData.passportPhotoFilePath
+      });
+      if (this.employeeData.passportPhotoFilePath) {
+        this.jobApplicationForm.get('Photofile')?.clearValidators();
+        this.jobApplicationForm.get('Photofile')?.updateValueAndValidity();
+      }
+      this.addressForm.patchValue({
+        permanentAddress: this.employeeData.permanentAddress,
+        stateId: this.employeeData.stateId || '',
+        districtId: this.employeeData.districtId,
+        pinCode: this.employeeData.pinCode,
+        correspondenceAddress: this.employeeData.correspondenceAddress,
+        cStateId: this.employeeData.cStateId || '0',
+        cDistrictId: this.employeeData.cDistrictId,
+        cPinCode: this.employeeData.cPinCode,
+      })
+      if (this.employeeData.stateId)
+        this.GetCity(Number(this.employeeData.stateId), 'permanent');
+      if (this.employeeData.cStateId)
+        this.GetCity(Number(this.employeeData.stateId), 'correspondence');
+      const formattedDateOfIssue = this.formatDate(this.employeeData.dateOfIssue);
+      const formattedValidUpto = this.formatDate(this.employeeData.validUpto);
+      this.passportDetailsForm.patchValue({
+        passportNo: this.employeeData.passportNo,
+        dateOfIssue: formattedDateOfIssue,
+        validUpto: formattedValidUpto,
+        issuedBy: this.employeeData.issuedBy,
+        passAddress: this.employeeData.passAddress,
+        pCityName: this.employeeData.pCityName,
+        emigrationChecReq: this.employeeData.emigrationChecReq,
+      });
+      this.socialForm.patchValue({
+        FacebookId: this.employeeData.facebookId,
+        LinkdinId: this.employeeData.linkdinId,
+        InstagramId: this.employeeData.instagramId,
+        TwiterId: this.employeeData.twiterId,
+        ResumefileUrl: this.employeeData.resumeFilePath
+      })
+      if (this.employeeData.resumeFilePath) {
+        this.jobApplicationForm.get('Resumefile')?.clearValidators();
+        this.jobApplicationForm.get('Resumefile')?.updateValueAndValidity();
+        this.safeResumeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
+          this.employeeData.resumeFilePath
+        );
+      }
+      if (this.employeeData.healthDetails) {
+        this.healthDetailsForm.patchValue({
+          empHealth_Id: this.employeeData.healthDetails.empHealth_Id,
+          vision: this.employeeData.healthDetails.vision,
+          bloodPressure: this.employeeData.healthDetails.bloodPressure,
+          diabetes: this.employeeData.healthDetails.diabetes,
+          heartAilments: this.employeeData.healthDetails.heartAilments,
+          anyOtherIllnes: this.employeeData.healthDetails.anyOtherIllnes,
+          lastMajorIllness: this.employeeData.healthDetails.lastMajorIllness,
+          majoreIllnessDate: this.formatDate(this.employeeData.healthDetails.majoreIllnessDate || ''),
+          bloodGroop: this.employeeData.healthDetails.bloodGroop
+        })
+      }
+      if (this.employeeData.skillDetails.length > 0) {
+        this.skills.clear();
+        this.employeeData.skillDetails.forEach(skill => {
+          const skillFormGroup = this.createSkillsTab();
+          skillFormGroup.patchValue(skill);
+          this.skills.push(skillFormGroup);
+        });
+      }
+      if (this.employeeData.languageDetails.length > 0) {
+        this.languages.clear();
+        this.employeeData.languageDetails.forEach(language => {
+          const languageFormGroup = this.createLanguageTab();
+          languageFormGroup.patchValue(language);
+          this.languages.push(languageFormGroup)
+        });
+      }
+      if (this.employeeData.qualificationDetails.length > 0) {
+        this.qualifications.clear();
+        this.employeeData.qualificationDetails.forEach((qual, index) => {
+          let safeImageUrl!: SafeResourceUrl
+          const qualificationFormGroup = this.createQualificationTab();
+          if (qual.imageFile) {
+            qualificationFormGroup.get('imageFile')?.clearValidators();
+            qualificationFormGroup.get('imageFile')?.updateValueAndValidity();
+
+            safeImageUrl = this.sanitizer.bypassSecurityTrustResourceUrl(qual.imageFile);
+          }
+          qualificationFormGroup.patchValue({
+            qulDtl_Id: qual.qulDtl_Id,
+            OrderNo: qual.orderNo,
+            DegreeName: qual.degreeName,
+            Specialization: qual.specialization,
+            PassingYear: qual.passingYear.trim(),
+            imageFileUrl: qual.imageFile,
+            safeImageFileUrl: safeImageUrl,
+          });
+          this.qualifications.push(qualificationFormGroup)
+        })
+      }
+      if (this.employeeData.experienceDetails.length > 0) {
+        this.experiences.clear();
+        this.employeeData.experienceDetails.forEach(exp => {
+          const experienceFormGroup = this.createExperienceTab();
+          const formattedStartDate = this.formatDate(exp.startDate);
+          const formattedEndDate = this.formatDate(exp.endDate);
+          experienceFormGroup.patchValue({
+            ...exp,
+            startDate: formattedStartDate,
+            endDate: formattedEndDate
+          });
+          this.experiences.push(experienceFormGroup)
+        })
+      }
+    });
+  }
+
   onStateChange(event: any, type: string): void {
     const selectedStateId = +event.target.value;
-
     if (selectedStateId) {
       if (type === 'permanent') {
         this.jobApplicationForm.patchValue({
@@ -168,17 +318,15 @@ export class JobApplicationITOilComponent {
         this.jobApplicationForm.get('districtId')?.enable();
       } else if (type === 'correspondence') {
         this.jobApplicationForm.patchValue({
-          cDistrictId: ''
+          correspondenceDistrict: ''
         });
         this.GetCity(selectedStateId, 'correspondence');
         this.jobApplicationForm.get('cDistrictId')?.enable();
       }
     } else {
       if (type === 'permanent') {
-        //this.jobApplicationForm.get('districtId')?.disable();
         this.districtsForState = [];
       } else if (type === 'correspondence') {
-        //this.jobApplicationForm.get('correspondenceDistrict')?.disable();
         this.districtsForCorrespondenceState = [];
       }
     }
@@ -199,6 +347,10 @@ export class JobApplicationITOilComponent {
       this.submitpassportDetailsForm();
     } else if (this.currentStep === 6 && this.languageForm.valid) {
       this.submitlanguageForm();
+    } else if (this.currentStep === 8 && this.experienceDetailForm.valid) {
+      this.submitexperienceDetailForm();
+    } else if (this.currentStep === 9 && this.isFormValid) {
+      this.submitsocialForm();
       //} else {
       //  Object.keys(this.BankDetailsForm.controls).forEach(key => {
       //    const control = this.BankDetailsForm.get(key);
@@ -228,7 +380,7 @@ export class JobApplicationITOilComponent {
       (result: any) => {
         if (result.status == 200) {
           Swal.fire('Success!', 'Basic Details submitted successfully.', 'success').then(() => {
-            if (this.currentStep < 8) {
+            if (this.currentStep < 9) {
               this.currentStep++;
             }
           });
@@ -242,6 +394,7 @@ export class JobApplicationITOilComponent {
   submititSkillForm(): void {
     this.skillDetail.mobileNo = this.MobileNo;
     this.skillDetail.skillDtl = this.skills.value.map((skill: any) => ({
+      id: skill.id,
       skillName: skill.skillName,
       softwareVerson: skill.softwareVerson,
       lastUsed: skill.lastUsed,
@@ -252,7 +405,7 @@ export class JobApplicationITOilComponent {
       (result: any) => {
         if (result.status == 200) {
           Swal.fire('Success!', 'Skills submitted successfully.', 'success').then(() => {
-            if (this.currentStep < 8) {
+            if (this.currentStep < 9) {
               this.currentStep++;
             }
           });
@@ -270,7 +423,7 @@ export class JobApplicationITOilComponent {
       (result: any) => {
         if (result.status == 200) {
           Swal.fire('Success!', 'Address details submitted successfully.', 'success').then(() => {
-            if (this.currentStep < 8) {
+            if (this.currentStep < 9) {
               this.currentStep++;
             }
           });
@@ -288,7 +441,7 @@ export class JobApplicationITOilComponent {
       (result: any) => {
         if (result.status == 200) {
           Swal.fire('Success!', 'Health details submitted successfully.', 'success').then(() => {
-            if (this.currentStep < 8) {
+            if (this.currentStep < 9) {
               this.currentStep++;
             }
           });
@@ -328,10 +481,10 @@ export class JobApplicationITOilComponent {
       });
     }
   }
-
   submitlanguageForm(): void {
     this.languageDetail.mobileNo = this.MobileNo;
     this.languageDetail.lanDtl = this.languages.value.map((lang: any) => ({
+      empLanguage_Id: lang.empLanguage_Id,
       languageName: lang.languageName,
       speek: lang.speek == true ? 1 : 0,
       understand: lang.understand == true ? 1 : 0,
@@ -342,7 +495,7 @@ export class JobApplicationITOilComponent {
       (result: any) => {
         if (result.status == 200) {
           Swal.fire('Success!', 'Languages submitted successfully.', 'success').then(() => {
-            if (this.currentStep < 8) {
+            if (this.currentStep < 9) {
               this.currentStep++;
             }
           });
@@ -353,33 +506,94 @@ export class JobApplicationITOilComponent {
       }
     );
   }
-
-  submitQualificationTab(): void {
-    if (this.currentStep === 7) {
-      // Check if at least one tab is saved
-      const isAnyTabSaved = this.savedTabs.some((isSaved) => isSaved);
-  
-      if (!isAnyTabSaved) {
-        Swal.fire('Error', 'Please fill and save at least one qualification tab before proceeding.', 'error');
-        return;
+  submitexperienceDetailForm(): void {
+    this.experienceDetail.mobileNo = this.MobileNo;
+    this.experienceDetail.expDtl = this.experiences.value.map((exp: any) => ({
+      empExperienceId: exp.empExperienceId,
+      companyName: exp.companyName,
+      position: exp.position,
+      startDate: exp.startDate,
+      endDate: exp.endDate,
+      hodName: exp.hodName,
+      hodEmail: exp.hodEmail,
+      hodMobileNo: exp.hodMobileNo,
+    }));
+    this.jobappservice.AddEightScreen(this.experienceDetail).subscribe(
+      (result: any) => {
+        if (result.status == 200) {
+          Swal.fire('Success!', 'Experience submitted successfully.', 'success').then(() => {
+            if (this.currentStep < 9) {
+              this.currentStep++;
+            }
+          });
+        }
+      },
+      (error: any) => {
+        Swal.fire('Error', error.error.title, 'error');
       }
-  
-      // Check if all tabs are filled and saved
-      const areAllTabsSaved = this.savedTabs.every((isSaved) => isSaved);
-  
-      if (areAllTabsSaved) {
-        Swal.fire('Success', 'All qualifications have been saved and submitted.', 'success');
-      }
-    }
-  
-    // Proceed to the next step if conditions are met
-    if (this.currentStep < 8) {
-      this.currentStep++;
+    );
+  }
+  submitsocialForm(): void {
+    this.socialDetail.FacebookId = this.socialForm.controls['FacebookId'].value;
+    this.socialDetail.TwiterId = this.socialForm.controls['TwiterId'].value;
+    this.socialDetail.InstagramId = this.socialForm.controls['InstagramId'].value;
+    this.socialDetail.LinkdinId = this.socialForm.controls['LinkdinId'].value;
+    this.socialDetail.mobileNo = this.MobileNo;
+    if (!this.socialDetail.Resumefile && this.employeeData.resumeFilePath) {
+      this.convertUrlToFile(this.employeeData.resumeFilePath).then((file) => {
+        this.socialDetail.Resumefile = file;
+        this.sendSocialData();
+      });
+    } else {
+      this.sendSocialData();
     }
   }
-  
+  sendSocialData() {
+    this.jobappservice.AddNineScreen(this.socialDetail).subscribe(
+      (result: any) => {
+        if (result.status == 200) {
+          Swal.fire('Success!', 'Your Application submitted successfully.', 'success').then(() => {
+            if (this.currentStep < 9) {
+              this.currentStep++;
+            }
+            this.router.navigate(['/final-job-application-details']);
+          });
+        }
+      },
+      (error: any) => {
+        Swal.fire('Error', error.error.title, 'error');
+      }
+    );
+  }
+  convertUrlToFile(url: string): Promise<File> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.src = url;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0);
+          canvas.toBlob((blob) => {
+            if (blob) {
+              const fileName = url.split('/').pop() || 'downloaded-file.jpg';
+              const file = new File([blob], fileName, { type: blob.type });
+              resolve(file);
+            } else {
+              reject(new Error('Canvas blob conversion failed.'));
+            }
+          });
+        } else {
+          reject(new Error('Canvas context is not available.'));
+        }
+      };
+      img.onerror = () => reject(new Error('Failed to load the image.'));
+    });
+  }
 
- 
 
   goToNext(): void {
     if (this.currentStep < 8) {
@@ -396,47 +610,49 @@ export class JobApplicationITOilComponent {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
-      const allowedTypes = ['pdf', 'jpg', 'jpeg', 'png'];
       const filename = file.name;
       const extension = filename.split('.').pop()?.toLowerCase();
+      let allowedTypes: string[] = [];
+      switch (fieldName) {
+        case 'Resumefile':
+          allowedTypes = ['pdf'];
+          break;
+        case 'Photofile':
+          allowedTypes = ['jpg', 'jpeg', 'png'];
+          break;
+        case 'imageFile':
+          allowedTypes = ['pdf'];
+          break;
+        default:
+          console.error('Unknown field name:', fieldName);
+          return;
+      }
       if (extension && !allowedTypes.includes(extension)) {
         Swal.fire({
           icon: 'error',
           title: 'Invalid file type!',
-          text: 'Please upload a PDF, JPG, JPEG, or PNG file.',
-          confirmButtonText: 'OK'
+          text: `Please upload a ${allowedTypes.join(', ').toUpperCase()} file.`,
+          confirmButtonText: 'OK',
         });
         input.value = '';
+        return;
       }
-      else {
-        switch (fieldName) {
-          case 'adharFile':
-            //this.applicationData.adharFile = file;
-            break;
-          case 'panFile':
-            //this.applicationData.panFile = file;
-            break;
-          case 'qualificationFile':
-            //this.applicationData.qualificationFile = file;
-            break;
-          case 'bankStatementFile':
-            //this.applicationData.bankStatementFile = file;
-            break;
-          case 'resumeFile':
-            this.resumeModel.resumeFile = file;
-            break;
-          case 'Photofile':
-            this.applicationData.Photofile = file;
-            break;
-          case 'imageFile':
-            this.qualificationDetail.imageFile = file;
-            break;
-          default:
-            console.error('Unknown field name:', fieldName);
-        }
+      switch (fieldName) {
+        case 'Resumefile':
+          this.socialDetail.Resumefile = file;
+          break;
+        case 'Photofile':
+          this.applicationData.Photofile = file;
+          break;
+        case 'imageFile':
+          this.qualificationDetail.imageFile = file;
+          break;
+        default:
+          console.error('Unknown field name:', fieldName);
       }
     }
   }
+
   onLanguageChange(): void {
     this.changeLabels(this.language ? 'hn' : 'en');
   }
@@ -524,8 +740,13 @@ export class JobApplicationITOilComponent {
         labelPassportAddress: "Passport Address",
         labelSoftwareVersion: "Software version",
         labelLastUsed: "Last used",
-        labelExperience: "Experience"
-
+        labelExperience: "Experience",
+        labelFacebookId: "Facebook ID",
+        labelLinkdinId: "LinkedIn ID",
+        labelInstagramId: "Instagram ID",
+        labelTwiterId: "Twitter ID",
+        labelResumefile: "Resume File",
+        labelSocial: "Social Details",
 
       };
     } else if (language == 'hn') {
@@ -611,8 +832,13 @@ export class JobApplicationITOilComponent {
         labelPassportAddress: "पता",
         labelSoftwareVersion: "सॉफ़्टवेयर संस्करण",
         labelLastUsed: "अंतिम उपयोग",
-        labelExperience: "अनुभव"
-
+        labelExperience: "अनुभव",
+        labelFacebookId: "फेसबुक आईडी",
+        labelLinkdinId: "लिंक्डइन आईडी",
+        labelInstagramId: "इंस्टाग्राम आईडी",
+        labelTwiterId: "ट्विटर आईडी",
+        labelResumefile: "रिज़्यूमे फ़ाइल",
+        labelSocial: "सामाजिक विवरण",
       };
     }
   }
@@ -653,9 +879,9 @@ export class JobApplicationITOilComponent {
   get skills(): FormArray {
     return this.itSkillForm.get('skills') as FormArray;
   }
-
   createSkillsTab(): FormGroup {
     return this.fb.group({
+      id: [0],
       skillName: ['', Validators.required],
       softwareVerson: ['', Validators.required],
       lastUsed: ['', [Validators.required, Validators.pattern(/^\d{4}$/)]],
@@ -672,18 +898,19 @@ export class JobApplicationITOilComponent {
     }
   }
 
-
   get qualifications(): FormArray {
     return this.QualificationForm.get('qualifications') as FormArray;
   }
-
   createQualificationTab(): FormGroup {
     return this.fb.group({
+      qulDtl_Id: [0],
       OrderNo: ['', Validators.required],
       DegreeName: ['', Validators.required],
       Specialization: ['', Validators.required],
-      PassingYear: ['', Validators.required, Validators.pattern(/^\d{4}-\d{4}$/)],
+      PassingYear: ['', [Validators.required, Validators.pattern(/^\d{4}-\d{4}$/)]],
       imageFile: ['', Validators.required],
+      imageFileUrl: [''],
+      safeImageFileUrl: [''],
     });
   }
   addQualicationTab(index: number): void {
@@ -696,12 +923,11 @@ export class JobApplicationITOilComponent {
       // this.savedTabs.splice(index, 1);
     }
   }
-
   removeQualicationTab(index: number): void {
-  // if (this.qualifications.length > 1) {
+    // if (this.qualifications.length > 1) {
     const tabData = this.qualifications.at(index)?.value;
     const orderNo = parseInt(tabData?.OrderNo, 10);
-    
+
     const removeDetail: RemoveQualDetail = {
       mobileNo: this.MobileNo,
       orderNo: isNaN(orderNo) ? 0 : orderNo
@@ -721,7 +947,7 @@ export class JobApplicationITOilComponent {
               Swal.fire('Deleted!', 'Qualification deleted successfully.', 'success');
               this.qualifications.removeAt(index);
               this.savedTabs.splice(index, 1);
-              this.addQualicationTab(index+1);
+              this.addQualicationTab(index + 1);
             } else {
               Swal.fire('Error', 'Failed to delete qualification.', 'error');
             }
@@ -734,72 +960,65 @@ export class JobApplicationITOilComponent {
         Swal.fire('Cancelled', 'Your qualification is safe!', 'info');
       }
     });
-
-    // this.jobappservice.DeleteSevenScreen(removeDetail).subscribe(
-    //   (result: any) => {
-    //     if (result.status === 200) {
-    //       Swal.fire('Success!', 'Qualification deleted successfully.', 'success');
-    //       // Remove the tab and its saved state
-          
-    //       this.qualifications.removeAt(index);
-    //       this.savedTabs.splice(index, 1);
-    //     } else {
-    //       Swal.fire('Error', 'Failed to delete qualification.', 'error');
-    //     }
-    //   },
-    //   (error: any) => {
-    //     Swal.fire('Error', error.error.title, 'error');
-    //   }
-    // );
-  // }
-}
-
-  saveQualification(index: number): void {
-    this.savedTabs[index] = true;
-    if (index < 0 || index >= this.qualifications.length) {
-      console.error('Invalid index:', index);
-      Swal.fire('Error', 'Invalid tab index.', 'error');
-      return;
-    }
-  
-    const tabData = this.qualifications.at(index)?.value;
-    console.log('Tab Data:', tabData);
-  
-    if (!tabData) {
-      Swal.fire('Error', 'Tab data is missing.', 'error');
-      return;
-    }
-    const orderNo = parseInt(tabData.OrderNo, 10);
-    // Proceed with the qualification details
-    this.qualificationDetail.MobileNo = this.MobileNo;
-    this.qualificationDetail.OrderNo = isNaN(orderNo) ? 0 : orderNo;
-    this.qualificationDetail.DegreeName = tabData.DegreeName || this.QualificationForm.controls['DegreeName'].value;
-    this.qualificationDetail.Specialization = tabData.Specialization || this.QualificationForm.controls['Specialization'].value;
-    this.qualificationDetail.PassingYear = tabData.PassingYear || this.QualificationForm.controls['PassingYear'].value;
-  
-    this.jobappservice.AddSevenScreen(this.qualificationDetail).subscribe(
-      (result: any) => {
-        if (result.status === 200) {
-          Swal.fire('Success!', 'Qualification submitted successfully.', 'success')
-          // .then(() => {
-          //   if (this.currentStep < 8) {
-          //     this.currentStep++;
-          //   }
-          // });
-        }
-      },
-      (error: any) => {
-        Swal.fire('Error', error.error.title, 'error');
-      }
-    );
   }
-  
+  saveQualification(index: number): void {
+    if (this.QualificationForm.valid) {
+      this.savedTabs[index] = true;
+      if (index < 0 || index >= this.qualifications.length) {
+        console.error('Invalid index:', index);
+        Swal.fire('Error', 'Invalid tab index.', 'error');
+        return;
+      }
+
+      const tabData = this.qualifications.at(index)?.value;
+      console.log('Tab Data:', tabData);
+
+      if (!tabData) {
+        Swal.fire('Error', 'Tab data is missing.', 'error');
+        return;
+      }
+      const orderNo = parseInt(tabData.OrderNo, 10);
+      this.qualificationDetail.MobileNo = this.MobileNo;
+      this.qualificationDetail.orderNo = isNaN(orderNo) ? 0 : orderNo;
+      this.qualificationDetail.degreeName = tabData.DegreeName || this.QualificationForm.controls['DegreeName'].value;
+      this.qualificationDetail.specialization = tabData.Specialization || this.QualificationForm.controls['Specialization'].value;
+      this.qualificationDetail.passingYear = tabData.PassingYear || this.QualificationForm.controls['PassingYear'].value;
+
+      this.jobappservice.AddSevenScreen(this.qualificationDetail).subscribe(
+        (result: any) => {
+          if (result.status === 200) {
+            Swal.fire('Success!', 'Qualification submitted successfully.', 'success')
+          }
+        },
+        (error: any) => {
+          Swal.fire('Error', error.error.title, 'error');
+        }
+      );
+    }
+  }
+  submitQualificationTab(): void {
+    if (this.currentStep === 7) {
+      const isAnyTabSaved = this.savedTabs.some((isSaved) => isSaved);
+      if (!isAnyTabSaved && this.employeeData.qualificationDetails.length==0) {
+        Swal.fire('Error', 'Please fill and save at least one qualification tab before proceeding.', 'error');
+        return;
+      }
+      const areAllTabsSaved = this.savedTabs.every((isSaved) => isSaved);
+      if (areAllTabsSaved) {
+        Swal.fire('Success', 'All qualifications have been saved and submitted.', 'success');
+      }
+    }
+    if (this.currentStep < 8) {
+      this.currentStep++;
+    }
+  }
+
   get languages(): FormArray {
     return this.languageForm.get('languages') as FormArray;
   }
-
   createLanguageTab(): FormGroup {
     return this.fb.group({
+      empLanguage_Id: [0],
       languageName: ['', Validators.required],
       understand: [false],
       read: [false],
@@ -822,23 +1041,22 @@ export class JobApplicationITOilComponent {
 
   createExperienceTab(): FormGroup {
     return this.fb.group({
-      company: ['', Validators.required],
+      empExperienceId: [0],
+      companyName: ['', Validators.required],
       position: ['', Validators.required],
-      fromDate: ['', Validators.required],
-      toDate: ['', Validators.required],
+      startDate: ['', Validators.required],
+      endDate: ['', Validators.required],
       hodName: [''],
-      hodmobileNo: [''],
-      hodemailAddress: ['']
+      hodMobileNo: [''],
+      hodEmail: ['']
     });
   }
   addTab(index: number): void {
     this.experiences.push(this.createExperienceTab());
-    // this.initializeDatepickers();
   }
   removeTab(index: number): void {
     if (this.experiences.length > 1) {
       this.experiences.removeAt(index);
-      // this.initializeDatepickers();
     }
   }
   saveExperience(index: number) {
@@ -846,34 +1064,22 @@ export class JobApplicationITOilComponent {
     console.log('Saved experience:', experience);
   }
 
-  ngAfterViewInit(): void {
-    //$('#datepicker').datepicker({
-    //  format: 'dd/mm/yyyy',
-    //  autoclose: true,
-    //  todayHighlight: true,
-    //})
-    //  .on('changeDate', (e: any) => {
-    //    const selectedDate = e.format('dd/mm/yyyy');
-    //    this.jobApplicationForm.patchValue({ dateOfBirth: selectedDate });
-    //  });
-    // Use a timeout to ensure the DOM is ready
-    
-    // this.initializeDatepickers();
-  }
-  // Add AfterViewChecked to ensure datepicker initializes properly after view has been rendered
+  ngAfterViewInit(): void { }
   ngAfterViewChecked(): void {
+    this.initializeDatepicker('#dateOfBirth', this.jobApplicationForm, 'dateOfBirth');
     this.initializeDatepicker('#majoreIllnessDate', this.healthDetailsForm, 'majoreIllnessDate');
     this.initializeDatepicker('#dateOfIssue', this.passportDetailsForm, 'dateOfIssue');
     this.initializeDatepicker('#validUpto', this.passportDetailsForm, 'validUpto');
-    this.initializeDatepicker('#datepicker1', this.experienceDetailForm, 'datepicker1');
-    this.initializeDatepicker('#datepicker2', this.experienceDetailForm, 'datepicker2');
-    this.initializeDatepicker('#datepicker', this.jobApplicationForm, 'datepicker');
-    this.initializeDatepicker('#lastUsed', this.healthDetailsForm, 'lastUsed');
+    this.initializeDatepicker('#lastUsed', this.jobApplicationForm, 'lastUsed');
+    this.experiences.controls.forEach((control: any, index: number) => {
+      this.initializeDatepicker(`#startDate{index}`, control, 'startDate');
+      this.initializeDatepicker(`#endDate{index}`, control, 'endDate');
+    });
   }
 
   private initializeDatepicker(elementId: string, formGroup: any, controlName: string): void {
     const element = $(elementId);
-    if (element.length > 0) {
+    if (element.length > 0 && !element.data('datepicker')) {
       console.log(`${controlName} initialized`);
       element.datepicker({
         format: 'dd/mm/yyyy',
@@ -885,7 +1091,7 @@ export class JobApplicationITOilComponent {
       });
     }
   }
-  
+
   onCopyAddressChange(event: any): void {
     if (event.target.checked) {
       this.addressForm.patchValue({

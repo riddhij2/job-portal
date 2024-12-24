@@ -145,6 +145,7 @@ export class JobApplicationService {
     formData.append('DegreeName', model.degreeName || '');
     formData.append('Specialization', model.specialization || '');
     formData.append('PassingYear', model.passingYear || '');
+    formData.append('QulDtl_Id', model.qulDtl_Id.toString());
     if (model.imageFile) formData.append('imageFile', model.imageFile);
     return this.http.postWithFiles(url, formData);
   }

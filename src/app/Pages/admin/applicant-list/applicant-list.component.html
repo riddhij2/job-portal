@@ -1,0 +1,159 @@
+<div class="mt-4">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="d-flex justify-content-between align-items-center breadcrumb-bar">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/admin">{{groupname}}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Employee List</li>
+    </ol>
+    <button class="btn btn-primary ms-2" [routerLink]="'/admin/verify-employee'">Verify Employee</button>
+  </nav>
+
+
+  <!-- Form -->
+  <div class="form-container">
+    <form (ngSubmit)="onSubmit()">
+      <div class="row">
+        <!-- Left Column -->
+        <div class="col-md-6">
+          <div class="form-group mb-3">
+            <label for="zone" class="form-label">Zone</label>
+            <select class="form-select"
+                    [(ngModel)]="formData.zone"
+                    name="zone"
+                    (change)="GetSubDivision(formData.zone)"
+                    required>
+              <option value="" selected disabled>Select Zone</option>
+              <option *ngFor="let item of LocationList" [value]="item.locationId">{{ item.location }}</option>
+            </select>
+          </div>
+          <div class="form-group mb-3">
+            <label for="designation" class="form-label">Designation</label>
+            <select class="form-select"
+                    [(ngModel)]="formData.designation"
+                    name="designation"
+                    required>
+              <option value="" selected disabled>Select Designation</option>
+              <option *ngFor="let designation of DesignationList" [value]="designation.designationId">{{ designation.designationName }}</option>
+            </select>
+          </div>
+          <div class="form-group mb-3">
+            <label for="datepicker" class="form-label">From Date</label>
+            <div class="input-group" style="display: flex">
+              <input type="text"
+                     class="form-control"
+                     id="datepicker"
+                     [(ngModel)]="formData.fromDate"
+                     name="fromDate"
+                     placeholder="dd/mm/yyyy"
+                     required />
+              <span class="input-group-text">
+                <i class="entypo-calendar"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+        <!-- Right Column -->
+        <div class="col-md-6">
+          <div class="form-group mb-3">
+            <label for="sub-division" class="form-label">Sub Division</label>
+            <select class="form-select"
+                    [(ngModel)]="formData.subDivision"
+                    name="subDivision"
+                    required>
+              <option value="" selected disabled>Choose Sub Division</option>
+              <option *ngFor="let item of subDivisions" [value]="item.id">{{ item.name }}</option>
+            </select>
+          </div>
+          <div class="form-group mb-3">
+            <label for="status" class="form-label">Status</label>
+            <select class="form-select"
+                    [(ngModel)]="formData.status"
+                    name="status"
+                    required>
+              <option value="" selected disabled>Select Status</option>
+              <option *ngFor="let item of StatusList" [value]="item.id">{{ item.name }}</option>
+            </select>
+          </div>
+          <div class="form-group mb-3">
+            <label for="datepicker1" class="form-label">To Date</label>
+            <div class="input-group" style="display: flex">
+              <input type="text"
+                     class="form-control"
+                     id="datepicker1"
+                     [(ngModel)]="formData.toDate"
+                     name="toDate"
+                     placeholder="dd/mm/yyyy"
+                     required />
+              <span class="input-group-text">
+                <i class="entypo-calendar"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <!-- Search Bar -->
+        <div class="search-bar d-flex justify-content-between">
+          <div class="col-md-4">
+            <label for="zone" class="form-label">Count</label>
+          </div>
+          <div class="col-md-4 text-center">
+            <button class="btn btn-primary ms-2" type="submit">View</button>
+          </div>
+          <div class="col-md-4">
+            <input type="text"
+                   class="form-control"
+                   placeholder="Search here..."
+                   [(ngModel)]="formData.searchQuery"
+                   name="searchQuery"
+                   aria-label="Search" />
+          </div>
+        </div>
+      </div>
+    </form>
+    <hr />
+    <div class="row" *ngIf="applicantList.length>0">
+      <div class="col-md-12">
+        <table class="table table-bordered responsive" style="font-size: 12px;">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Gender</th>
+              <th>DOB</th>
+              <th>Age</th>
+              <th>Email Address</th>
+              <th>Mobile No</th>
+              <th>Father Mobile No</th>
+              <th>Revenue Town</th>
+              <th>Designation Name</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of paginatedApplicantList; let i = index">
+              <td>{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
+              <td>{{item.name}}</td>
+              <td>{{item.gender}}</td>
+              <td>{{item.dateOfBirth | date:'dd/MM/yyyy'}}</td>
+              <td>{{item.age}}</td>
+              <td>{{item.emailAddress}}</td>
+              <td>{{item.mobileNo}}</td>
+              <td>{{item.fatherMobileNo}}</td>
+              <td>{{item.revenueTown}}</td>
+              <td>{{item.designationName}}</td>
+              <td [title]="item.statusName+' by '+item.createdBy" style="cursor:pointer">{{item.statusName}}</td>
+            </tr>
+          </tbody>
+        </table>
+        <app-pagination [currentPage]="currentPage"
+                        [itemsPerPage]="itemsPerPage"
+                        [totalItems]="totalItems"
+                        [totalPages]="totalPages"
+                        (pageChanged)="onPageChange($event)"
+                        (pagesizeChanged)="onPagesizeChange($event)">
+        </app-pagination>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\src",
+    "\\src\\app",
+    "\\src\\app\\Models",
+    "\\src\\app\\Models\\JobApplication",
+    "\\src\\app\\Pages",
+    "\\src\\app\\Pages\\admin",
+    "\\src\\app\\Pages\\admin\\verify-employee",
+    "\\src\\app\\Services",
+    "\\src\\app\\Services\\JobApply"
+  ],
+  "SelectedNode": "\\src\\app\\Models\\JobApplication\\language-labels.ts",
+  "PreviewInSolutionExplorer": false
+}

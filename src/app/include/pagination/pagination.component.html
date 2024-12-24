@@ -1,0 +1,22 @@
+<div class="container-fluid">
+  <div class="row mt-4 ps-0 mb-5">
+    <div class="col-12 col-sm-6 pe-3 Showing-entries" style="font-size:14px;">
+      Items per Page:
+      <select (change)="handlePageSizeChange($event)" >
+        <option *ngFor="let size of pageSizes" value="{{size}}">
+          {{ size }}
+        </option>
+      </select>
+    </div>
+    <div class="col-12 col-sm-6 d-flex mt-3 flex-column mt-sm-0 align-items-end pe-3 pe-sm-4 pb-2">
+      <div class="page">
+        <ul class="pagination" style="display:flex;">
+          <li class="page-item"><button class="page-link previous-btn ms-2" style="font-size:14px;" (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1">Previous</button></li>
+          <li class="page-item" *ngFor="let page of visiblePages"><button class="page-link previous-btn" style="border-radius: 0px; font-size: 14px;" (click)="changePage(page)" [class.active]="currentPage === page">{{ page }}</button></li>
+          <li class="page-item"><button class="page-link next-btn" style="font-size:14px;" (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages">Next</button>
+        </ul>
+      </div>
+      <div class="Showing-entries d-flex justify-content-end justify-content-sm-start">Showing {{showingItems}} out of {{totalItems}} entries</div>
+    </div>
+  </div>
+</div>

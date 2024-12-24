@@ -1072,8 +1072,8 @@ export class JobApplicationITOilComponent {
     this.initializeDatepicker('#validUpto', this.passportDetailsForm, 'validUpto');
     this.initializeDatepicker('#lastUsed', this.jobApplicationForm, 'lastUsed');
     this.experiences.controls.forEach((control: any, index: number) => {
-      this.initializeDatepicker(`#startDate{index}`, control, 'startDate');
-      this.initializeDatepicker(`#endDate{index}`, control, 'endDate');
+      this.initializeDatepicker(`#startDate${index}`, control, 'startDate');
+      this.initializeDatepicker(`#endDate${index}`, control, 'endDate');
     });
   }
 

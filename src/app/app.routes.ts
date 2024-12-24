@@ -14,6 +14,8 @@ import { LoginComponent } from './Pages/login/login.component';
 import { AuthGuardService } from './Services/auth-guard/auth-guard.service';
 import { VerifyEmployeeComponent } from './Pages/admin/verify-employee/verify-employee.component';
 import { JobApplicationITOilComponent } from './Pages/home/job-application-itoil/job-application-itoil.component';
+import { FinalJobApplicationDetailsComponent } from './Pages/home/final-job-application-details/final-job-application-details.component';
+
 
 export const routes: Routes = [
   {
@@ -25,6 +27,7 @@ export const routes: Routes = [
       { path: 'T&C', component: TermsComponent },
       { path: 'JobApplication', component: JobApplicationComponent },
       { path: 'JobApplicationIO', component: JobApplicationITOilComponent },
+      { path: 'final-job-application-details', component: FinalJobApplicationDetailsComponent },
     ]
   },
   { path: 'login', component: LoginComponent },

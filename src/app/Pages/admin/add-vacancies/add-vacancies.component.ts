@@ -39,7 +39,7 @@ export class AddVacanciesComponent {
       this.getVacancy(this.route.snapshot.params['id']);
     }
     this.vacancyForm = this.fb.group({
-      vacancyId: [],
+      vacancyId: [0],
       groupDivisionId: ['', Validators.required],
       designationId: ['', Validators.required],
       projectId: ['', Validators.required],
@@ -173,7 +173,7 @@ export class AddVacanciesComponent {
         vacancyId: this.vacancyForm.value.vacancyId,
         projectId: Number(this.vacancyForm.value.projectId)
       };
-      if (this.vacancyForm.value.vacancyId = 0) {
+      if (this.vacancyForm.value.vacancyId == 0) {
         this.applicantservice.PostVacancy(this.addvacancymodel).subscribe(
           (result: any) => {
             if (result.status === 200) {

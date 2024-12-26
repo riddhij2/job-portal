@@ -23,16 +23,21 @@ export class ApplicantListComponent {
   groupid: number = 0;
   statusid: number = 0;
   type: string = '';
+  GroupDivisionList: any;
   DesignationList: DesignationItem[] = [];
   LocationList: LocationItem[] = [];
   subDivisions: SubDivision[] = [];
   formData = {
+    groupDivision: 0,
     zone: '',
     designation: '',
     fromDate: '',
     subDivision: '',
     status: '',
     toDate: '',
+    experienceFrom: '',
+    experienceTo: '',
+    keyskill: '',
     searchQuery: ''
   };
   StatusList: Bank[] = [];
@@ -48,19 +53,32 @@ export class ApplicantListComponent {
   constructor(private router: Router, private jobapplyservice: JobApplyService, private route: ActivatedRoute, private jobappservice: JobApplicationService, private applicantservice: ApplicantListService) {
   }
   ngOnInit(): void {
-    debugger;
+    this.GetGroupdivisions();
     const sessionData = sessionStorage.getItem('groupParams');
     if (sessionData) {
       const parsedData = JSON.parse(sessionData);
       this.groupname = parsedData.groupname;
-      this.groupid = parsedData.groupid;
+      this.formData.groupDivision = parsedData.groupid;
       this.statusid = parsedData.status;
       this.type = parsedData.type;
       this.GetDataDashboardLinked();
     }
-    this.showOptions(this.groupid);
+    this.showOptions(this.formData.groupDivision);
   }
-
+  GetGroupdivisions() {
+    this.jobapplyservice.GetGroupdivisions().subscribe(
+      (result: any) => {
+        if (result.status == 200) {
+          this.GroupDivisionList = result.body;
+        }
+      },
+      (error: any) => {
+        Swal.fire({
+          text: error.message,
+          icon: "error"
+        });
+      });
+  }
   showOptions(groupId: number) {
     this.groupid = groupId;
     this.GetDesignation(this.groupid);
@@ -121,7 +139,7 @@ export class ApplicantListComponent {
   }
 
   GetDataDashboardLinked() {
-    this.applicantReq.groupDivisionId = this.groupid;
+    this.applicantReq.groupDivisionId = this.formData.groupDivision;
     this.applicantReq.statusId = this.statusid;
     this.applicantReq.type = this.type;
     this.applicantservice.GetDataDashboardLinked(this.applicantReq).subscribe(
@@ -141,7 +159,7 @@ export class ApplicantListComponent {
       });
   }
   GetSearchDataPhotoSmart() {
-    this.applicantReq.groupDivisionId = this.groupid;
+    this.applicantReq.groupDivisionId = this.formData.groupDivision;
     this.applicantReq.statusId = this.statusid;
     this.applicantReq.type = this.type;
     this.applicantReq.zoneId = Number(this.formData.zone);

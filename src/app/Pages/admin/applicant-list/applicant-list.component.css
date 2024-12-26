@@ -32,7 +32,7 @@
 }
 
   .form-group label {
-    min-width: 100px; /* Fixed width for label */
+    min-width: 120px; /* Fixed width for label */
     margin-right: 10px; /* Space between label and input */
   }
 

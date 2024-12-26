@@ -55,7 +55,7 @@ export class JobApplicationITOilComponent {
   lg: Language = new Language();
   experience: Experience = new Experience();
   resumeModel = new Resume;
-  currentStep: number = 7;
+  currentStep: number = 1;
   Applicantmodel: HealthDetail = new HealthDetail();
 
   minDate = new Date(2000, 0, 1);
@@ -157,7 +157,7 @@ export class JobApplicationITOilComponent {
     const linkdinId = this.socialForm.get('LinkdinId')?.value?.trim();
     const instagramId = this.socialForm.get('InstagramId')?.value?.trim();
     const twiterId = this.socialForm.get('TwiterId')?.value?.trim();
-    const resumeFile = this.socialForm.get('Resumefile')?.value;
+    const resumeFile = this.socialForm.get('Resumefile')?.value || this.employeeData.resumeFilePath;
     const isFileSelected = resumeFile === '' ? false : true;
     this.isFormValid = (facebookId || linkdinId || instagramId || twiterId) && isFileSelected;
   }
@@ -270,13 +270,14 @@ export class JobApplicationITOilComponent {
       if (this.employeeData.qualificationDetails.length > 0) {
         this.qualifications.clear();
         this.employeeData.qualificationDetails.forEach((qual, index) => {
-          let safeImageUrl!: SafeResourceUrl
           const qualificationFormGroup = this.createQualificationTab();
           if (qual.imageFile) {
             qualificationFormGroup.get('imageFile')?.clearValidators();
             qualificationFormGroup.get('imageFile')?.updateValueAndValidity();
-
-            safeImageUrl = this.sanitizer.bypassSecurityTrustResourceUrl(qual.imageFile);
+            const safeImageUrl = this.sanitizer.bypassSecurityTrustResourceUrl(qual.imageFile);
+            qualificationFormGroup.patchValue({
+              safeImageFileUrl: safeImageUrl,
+            });
           }
           qualificationFormGroup.patchValue({
             qulDtl_Id: qual.qulDtl_Id,
@@ -285,10 +286,9 @@ export class JobApplicationITOilComponent {
             Specialization: qual.specialization,
             PassingYear: qual.passingYear.trim(),
             imageFileUrl: qual.imageFile,
-            safeImageFileUrl: safeImageUrl,
           });
-          this.qualifications.push(qualificationFormGroup)
-        })
+          this.qualifications.push(qualificationFormGroup);
+        });
       }
       if (this.employeeData.experienceDetails.length > 0) {
         this.experiences.clear();
@@ -540,12 +540,16 @@ export class JobApplicationITOilComponent {
     this.socialDetail.LinkdinId = this.socialForm.controls['LinkdinId'].value;
     this.socialDetail.mobileNo = this.MobileNo;
     if (!this.socialDetail.Resumefile && this.employeeData.resumeFilePath) {
-      this.convertUrlToFile(this.employeeData.resumeFilePath).then((file) => {
-        this.socialDetail.Resumefile = file;
-        this.sendSocialData();
-      });
+      this.handlePdfUpload(this.employeeData.resumeFilePath)
+        .then((file) => {
+          this.socialDetail.Resumefile = file;
+          this.sendSocialData(); 
+        })
+        .catch((error) => {
+          console.error('Error handling PDF upload:', error.message);
+        });
     } else {
-      this.sendSocialData();
+      this.sendSocialData(); 
     }
   }
   sendSocialData() {
@@ -565,34 +569,31 @@ export class JobApplicationITOilComponent {
       }
     );
   }
-  convertUrlToFile(url: string): Promise<File> {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.src = url;
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0);
-          canvas.toBlob((blob) => {
-            if (blob) {
-              const fileName = url.split('/').pop() || 'downloaded-file.jpg';
-              const file = new File([blob], fileName, { type: blob.type });
-              resolve(file);
-            } else {
-              reject(new Error('Canvas blob conversion failed.'));
-            }
-          });
-        } else {
-          reject(new Error('Canvas context is not available.'));
-        }
-      };
-      img.onerror = () => reject(new Error('Failed to load the image.'));
-    });
+  handlePdfUpload(url: string): Promise<File> {
+    return this.downloadFile(url)
+      .then((blob) => {
+        const fileName = url.split('/').pop() || 'uploaded-file.pdf';
+        return this.convertBlobToFile(blob, fileName);
+      })
+      .catch((error) => {
+        throw new Error(`Error handling PDF upload: ${error.message}`);
+      });
   }
+
+  downloadFile(url: string): Promise<Blob> {
+    return fetch(url)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Failed to download file from URL: ${url}`);
+        }
+        return response.blob();
+      });
+  }
+
+  convertBlobToFile(blob: Blob, fileName: string): File {
+    return new File([blob], fileName, { type: blob.type });
+  }
+
 
 
   goToNext(): void {
@@ -606,7 +607,7 @@ export class JobApplicationITOilComponent {
       this.currentStep--;
     }
   }
-  onFileChange(event: Event, fieldName: string, index?: number): void {
+  onFileChange(event: Event, fieldName: string): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
@@ -649,17 +650,6 @@ export class JobApplicationITOilComponent {
           break;
         default:
           console.error('Unknown field name:', fieldName);
-      }
-      if (fieldName === 'Resumefile') {
-        // Handle file for Resumefile (without index)
-        this.socialDetail.Resumefile = file;
-      } else if (index !== undefined && fieldName === 'imageFile') {
-        // Handle file for imageFile (with index)
-        this.qualifications.at(index)?.patchValue({
-          imageFile: file,
-          imageFileUrl: URL.createObjectURL(file),
-          safeImageFileUrl: this.sanitizer.bypassSecurityTrustResourceUrl(URL.createObjectURL(file)),
-        });
       }
     }
   }
@@ -994,23 +984,37 @@ export class JobApplicationITOilComponent {
       this.qualificationDetail.degreeName = tabData.DegreeName || this.QualificationForm.controls['DegreeName'].value;
       this.qualificationDetail.specialization = tabData.Specialization || this.QualificationForm.controls['Specialization'].value;
       this.qualificationDetail.passingYear = tabData.PassingYear || this.QualificationForm.controls['PassingYear'].value;
-
-      this.jobappservice.AddSevenScreen(this.qualificationDetail).subscribe(
-        (result: any) => {
-          if (result.status === 200) {
-            Swal.fire('Success!', 'Qualification submitted successfully.', 'success')
-          }
-        },
-        (error: any) => {
-          Swal.fire('Error', error.error.title, 'error');
-        }
-      );
+      this.qualificationDetail.qulDtl_Id = tabData.qulDtl_Id || this.QualificationForm.controls['qulDtl_Id'].value;
+      if (!this.qualificationDetail.imageFile && this.employeeData.qualificationDetails[index].imageFile) {
+        this.handlePdfUpload(this.employeeData.qualificationDetails[index].imageFile)
+          .then((file) => {
+            this.qualificationDetail.imageFile = file;
+            this.sendQualificationData();
+          })
+          .catch((error) => {
+            console.error('Error handling PDF upload:', error.message);
+          });
+      } else {
+        this.sendQualificationData();
+      }
     }
+  }
+  sendQualificationData() {
+    this.jobappservice.AddSevenScreen(this.qualificationDetail).subscribe(
+      (result: any) => {
+        if (result.status === 200) {
+          Swal.fire('Success!', 'Qualification submitted successfully.', 'success')
+        }
+      },
+      (error: any) => {
+        Swal.fire('Error', error.error.title, 'error');
+      }
+    );
   }
   submitQualificationTab(): void {
     if (this.currentStep === 7) {
       const isAnyTabSaved = this.savedTabs.some((isSaved) => isSaved);
-      if (!isAnyTabSaved && this.employeeData.qualificationDetails.length==0) {
+      if (!isAnyTabSaved && this.employeeData.qualificationDetails.length == 0) {
         Swal.fire('Error', 'Please fill and save at least one qualification tab before proceeding.', 'error');
         return;
       }

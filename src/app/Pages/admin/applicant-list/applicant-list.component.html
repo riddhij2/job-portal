@@ -16,6 +16,17 @@
         <!-- Left Column -->
         <div class="col-md-6">
           <div class="form-group mb-3">
+            <label for="zone" class="form-label">Group Division</label>
+            <select class="form-select"
+                    [(ngModel)]="formData.groupDivision"
+                    name="groupDivision"
+                    (change)="showOptions(formData.groupDivision)"
+                    required>
+              <option value="0" selected disabled>Select Group Division</option>
+              <option *ngFor="let item of GroupDivisionList" [value]="item.divisionId">{{ item.name }}</option>
+            </select>
+          </div>
+          <div class="form-group mb-3">
             <label for="zone" class="form-label">Zone</label>
             <select class="form-select"
                     [(ngModel)]="formData.zone"
@@ -51,16 +62,25 @@
               </span>
             </div>
           </div>
+          <div class="form-group mb-3">
+            <label for="experienceFrom" class="form-label">Experience From</label>
+            <input type="number"
+                   class="form-control"
+                   placeholder="Enter Experience"
+                   [(ngModel)]="formData.experienceFrom"
+                   name="experienceFrom"
+                   aria-label="Search" />
+          </div>
         </div>
         <!-- Right Column -->
         <div class="col-md-6">
           <div class="form-group mb-3">
-            <label for="sub-division" class="form-label">Sub Division</label>
+            <label for="sub-division" class="form-label">Location</label>
             <select class="form-select"
                     [(ngModel)]="formData.subDivision"
                     name="subDivision"
                     required>
-              <option value="" selected disabled>Choose Sub Division</option>
+              <option value="" selected disabled>Choose Location</option>
               <option *ngFor="let item of subDivisions" [value]="item.id">{{ item.name }}</option>
             </select>
           </div>
@@ -73,6 +93,15 @@
               <option value="" selected disabled>Select Status</option>
               <option *ngFor="let item of StatusList" [value]="item.id">{{ item.name }}</option>
             </select>
+          </div>
+          <div class="form-group mb-3">
+            <label for="keyskill" class="form-label">Key Skill</label>
+            <input type="text"
+                   class="form-control"
+                   placeholder="Type Key Skill"
+                   [(ngModel)]="formData.keyskill"
+                   name="keyskill"
+                   aria-label="Search" />
           </div>
           <div class="form-group mb-3">
             <label for="datepicker1" class="form-label">To Date</label>
@@ -88,6 +117,15 @@
                 <i class="entypo-calendar"></i>
               </span>
             </div>
+          </div>
+          <div class="form-group mb-3">
+            <label for="experienceTo" class="form-label">Experience To</label>
+            <input type="number"
+                   class="form-control"
+                   placeholder="Enter Experience"
+                   [(ngModel)]="formData.experienceTo"
+                   name="experienceTo"
+                   aria-label="Search" />
           </div>
         </div>
       </div>

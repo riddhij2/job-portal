@@ -1,5 +1,5 @@
 import { isPlatformBrowser, NgClass, NgIf, NgStyle } from '@angular/common';
-import { Component, Inject, NgModule, PLATFORM_ID, Renderer2 } from '@angular/core';
+import { Component, ElementRef, Inject, NgModule, PLATFORM_ID, Renderer2, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Login } from '../../models/Login/login';

@@ -2,6 +2,8 @@ import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { JobApplyService } from '../../../Services/JobApply/job-apply.service';
+import { AddDesignation } from '../../../Models/Masters/add-group-division';
+import { ActivatedRoute, Router } from '@angular/router';
 declare var Swal: any;
 
 @Component({
@@ -15,13 +17,15 @@ export class AddDesignationComponent {
   DesignationForm: FormGroup;
   isEditMode: boolean = false;
   submitted: boolean = false;
+  addDesignation = new AddDesignation;
   GroupDivisionList: any;
-  constructor(private fb: FormBuilder, private jobapplyservice: JobApplyService) {
+  constructor(private fb: FormBuilder, private jobapplyservice: JobApplyService, private route: ActivatedRoute, private router: Router) {
     this.DesignationForm = this.fb.group({
+      designationId: [0],
       designationName: ['', Validators.required],
       designationCode: ['', Validators.required],
       groupDivisionId: [0, Validators.required],
-      active: [true],
+      active: [1],
     });
     this.GetGroupdivisions();
   }
@@ -49,16 +53,64 @@ export class AddDesignationComponent {
         });
       });
   }
+
+  AddDesignations(designationId: number) {
+      this.addDesignation = {
+        designationId: designationId,
+        groupDivisionId: 0,
+        designationName: '',
+        designationCode: '',
+        active: 1
+      }
+      this.jobapplyservice.AddDesignation(this.addDesignation).subscribe(
+        (result: any) => {
+          if (result.status == 200) {
+            const existingData = result.body;
+            this.addDesignation.designationId = existingData.designationId;
+            this.addDesignation.groupDivisionId = existingData.divisionId;
+            this.addDesignation.designationName = existingData.designationName;
+            this.addDesignation.designationCode = existingData.designationCode;
+            this.addDesignation.active = existingData.active;
+            this.isEditMode = true;
+            this.DesignationForm.patchValue(this.addDesignation);
+          }
+        },
+        (error: any) => {
+          Swal.fire({
+            text: error.message,
+            icon: "error"
+          });
+        });
+    }
+
   onSubmit(): void {
-    this.submitted = true;
-    if (this.DesignationForm.invalid) {
-      return;
+      this.submitted = true;
+      if (this.DesignationForm.invalid) {
+        return;
+      }
+      const formData = this.DesignationForm.value;
+      this.jobapplyservice.AddDesignation(formData).subscribe(
+        (result: any) => {
+          if (result.status === 200) {
+            Swal.fire({
+              text: 'Designation saved successfully!',
+              icon: 'success',
+              confirmButtonText: 'OK'
+            }).then((result: { isConfirmed: any; }) => {
+              if (result.isConfirmed) {
+                if (this.isEditMode == true)
+                  this.router.navigate(['/admin/designation-list']);
+                else
+                  window.location.reload();
+              }
+            });
+          }
+        },
+        (error: any) => {
+          Swal.fire({
+            text: error.message,
+            icon: "error"
+          });
+        });
     }
-    const formData = this.DesignationForm.value;
-    if (this.isEditMode) {
-      console.log('Updating Designation Master:', formData);
-    } else {
-      console.log('Adding Designation Master:', formData);
-    }
-  }
 }

@@ -24,6 +24,7 @@ import { ProjectListComponent } from './Pages/admin/project-list/project-list.co
 import { DesignationListComponent } from './Pages/admin/designation-list/designation-list.component';
 import { ZoneListComponent } from './Pages/admin/zone-list/zone-list.component';
 import { FinalJobApplicationDetailsComponent } from './Pages/home/final-job-application-details/final-job-application-details.component';
+import { ItApplicationDetailsComponent } from './Pages/admin/it-application-details/it-application-details.component';
 
 export const routes: Routes = [
   {
@@ -59,6 +60,7 @@ export const routes: Routes = [
       { path: 'add-zone', component: AddZoneComponent, canActivate: [AuthGuardService] },
       { path: 'add-zone/:id', component: AddZoneComponent, canActivate: [AuthGuardService] },
       { path: 'zone-list', component: ZoneListComponent, canActivate: [AuthGuardService] },
+      { path: 'it-application-details', component: ItApplicationDetailsComponent },
     ]
   }
 ];

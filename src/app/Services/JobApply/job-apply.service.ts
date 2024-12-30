@@ -2,7 +2,7 @@ import { HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AddGroupDivision } from '../../Models/Masters/add-group-division';
+import { AddDesignation, AddGroupDivision, AddProject } from '../../Models/Masters/add-group-division';
 import { SendOTPRequest } from '../../Models/SendOTP/send-otprequest';
 import { GlobalService } from '../global/global.service';
 
@@ -71,6 +71,14 @@ export class JobApplyService {
   }
   AddGroupDivision(model: AddGroupDivision): Observable<any> {
     let url: string = environment.apiUrl + 'Master/AddGroupDivision';
+    return this.http.post(url, model);
+  }
+  AddProject(model: AddProject): Observable<any> {
+    let url: string = environment.apiUrl + 'Master/AddProject';
+    return this.http.post(url, model);
+  }
+  AddDesignation(model: AddDesignation): Observable<any>{
+    let url: string = environment.apiUrl + 'Master/AddDesignation';
     return this.http.post(url, model);
   }
 }

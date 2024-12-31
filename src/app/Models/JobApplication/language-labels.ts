@@ -89,6 +89,7 @@
   'labelTwiterId'?: string;
   'labelResumefile'?: string;
   'labelSocial'?: string;
+  'labelCurrentlyWorking'?: string;
 }
 
 export class DesignationItem {

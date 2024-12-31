@@ -81,4 +81,8 @@ export class JobApplyService {
     let url: string = environment.apiUrl + 'Master/AddDesignation';
     return this.http.post(url, model);
   }
+  GetDesignationById(model: AddDesignation): Observable<any> {
+    let url: string = environment.apiUrl + 'Master/GetDesignationById';
+    return this.http.post(url, model);
+  }
 }

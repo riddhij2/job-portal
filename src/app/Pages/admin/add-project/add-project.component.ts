@@ -29,15 +29,15 @@ export class AddProjectComponent {
     }
 
     this.ProjectForm = this.fb.group({
-      projectId:[0],
+      projectId: [0],
       projectName: ['', Validators.required],
       groupDivisionId: [0, Validators.required],
       active: [1],
-      
+
     });
     this.GetGroupdivisions();
 
-    
+
   }
   ngOnInit(): void {
     const existingData = this.getEditData();
@@ -89,34 +89,34 @@ export class AddProjectComponent {
         });
       });
   }
- onSubmit(): void {
-     this.submitted = true;
-     if (this.ProjectForm.invalid) {
-       return;
-     }
-     const formData = this.ProjectForm.value;
-     this.jobapplyservice.AddProject(formData).subscribe(
-       (result: any) => {
-         if (result.status === 200) {
-           Swal.fire({
-             text: 'Project saved successfully!',
-             icon: 'success',
-             confirmButtonText: 'OK'
-           }).then((result: { isConfirmed: any; }) => {
-             if (result.isConfirmed) {
-               if (this.isEditMode == true)
-                 this.router.navigate(['/admin/project-list']);
-               else
-                 window.location.reload();
-             }
-           });
-         }
-       },
-       (error: any) => {
-         Swal.fire({
-           text: error.message,
-           icon: "error"
-         });
-       });
-   }
+  onSubmit(): void {
+    this.submitted = true;
+    if (this.ProjectForm.invalid) {
+      return;
+    }
+    const formData = this.ProjectForm.value;
+    this.jobapplyservice.AddProject(formData).subscribe(
+      (result: any) => {
+        if (result.status === 200) {
+          Swal.fire({
+            text: 'Project saved successfully!',
+            icon: 'success',
+            confirmButtonText: 'OK'
+          }).then((result: { isConfirmed: any; }) => {
+            if (result.isConfirmed) {
+              if (this.isEditMode == true)
+                this.router.navigate(['/admin/project-list']);
+              else
+                window.location.reload();
+            }
+          });
+        }
+      },
+      (error: any) => {
+        Swal.fire({
+          text: error.message,
+          icon: "error"
+        });
+      });
+  }
 }

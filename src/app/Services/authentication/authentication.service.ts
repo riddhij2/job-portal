@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Login } from '../../models/Login/login';
 import { GlobalService } from '../global/global.service';
@@ -9,7 +9,7 @@ import { GlobalService } from '../global/global.service';
 })
 export class AuthenticationService {
   public isAuthenticated = false;
-
+  private isSidebarCollapsed = new BehaviorSubject<boolean>(false);
   constructor(private http: GlobalService) { }
 
   getLoginUser(loginInfo: Login): Observable<any> {
@@ -32,5 +32,11 @@ export class AuthenticationService {
 
   isAuthenticatedUser() {
     return sessionStorage.getItem('isAuthenticated') === 'true';
+  }
+  getSidebarState() {
+    return this.isSidebarCollapsed.asObservable();
+  }
+  toggleSidebar() {
+    this.isSidebarCollapsed.next(!this.isSidebarCollapsed.value);
   }
 }

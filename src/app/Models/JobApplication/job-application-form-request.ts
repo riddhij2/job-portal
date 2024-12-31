@@ -39,6 +39,7 @@ export class JobApplicationFormRequest {
 
 
 export class JobApplicationFormRequestIO {
+  'revenueId': string;
   'gender': string;
   'PinCode': string;
   'mobileNo': string;
@@ -91,6 +92,7 @@ export class Experience {
   'hodMobile': string;
   'hodEmail': string;
   'position': string;
+  'hodMobileNo': string;
 }
 export class Resume {
   'resumeFile': File;
@@ -138,6 +140,7 @@ export class Skill{
 }
 export class BasicDetail {
   'applicantId': number;
+  'revenueId': number;
   'fName': string;
   'mName': string;
   'lName': string;

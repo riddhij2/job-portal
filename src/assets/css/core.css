@@ -6590,7 +6590,7 @@ body {
     .page-container .sidebar-menu #main-menu li a {
       position: relative;
       display: block;
-      padding: 10px 20px;
+      padding: 10px 10px;
       color: #aaabae;
       z-index: 2;
       -webkit-transition: color 250ms ease-in-out, background-color 250ms ease-in-out;

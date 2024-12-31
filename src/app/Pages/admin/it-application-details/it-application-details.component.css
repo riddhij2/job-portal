@@ -185,3 +185,9 @@ h1.heading_apply_for_job.text-center.my-4 {
 .form-section-without-bg {
     margin-bottom: 50px;
 }
+.heightDiv {
+  min-height: 51px;
+}
+.form-label {
+  font-size: 1.5rem;
+}

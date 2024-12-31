@@ -72,7 +72,7 @@ export class JobApplicationComponent {
       cDistrictId: [{ value: '' }, Validators.required],
       cPinCode: ['', Validators.required],
       copyAddress: [false],
-      fatherMobileNo: ['', [Validators.required, Validators.pattern('[0-9]{10}')]],
+      fatherMobileNo: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
     });
     this.BankDetailsForm = this.fb.group({
       uanNo: ['', [Validators.pattern('[0-9]{12}')]],

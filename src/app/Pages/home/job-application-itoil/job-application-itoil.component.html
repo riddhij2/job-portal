@@ -15,6 +15,16 @@
         <form [formGroup]="jobApplicationForm">
           <div *ngIf="currentStep === 1">
             <h4 class="text-center">{{labels.labelPersonal}}</h4>
+            <!-- Sub Division -->
+            <div class="mb-3 row">
+              <label for="inputDivision" id="labelDivision" class="col-sm-2 col-form-label">{{labels.labelDivision}}<span class="text-danger">*</span></label>
+              <div class="col-sm-10">
+                <select formControlName="revenueId" class="form-select" required>
+                  <option value="0" disabled>Select a Division</option>
+                  <option *ngFor="let sd of subDivisions" [value]="sd.id">{{ sd.name }}</option>
+                </select>
+              </div>
+            </div>
             <div class="mb-3 row">
               <label for="inputName" id="labelName" class="col-sm-2 col-form-label">{{labels.labelName}} <br>(as per aadhar)<span class="text-danger">*</span></label>
               <div class="col-sm-3 width-27">
@@ -161,7 +171,7 @@
                 <div class="mb-3 mt-2 row">
                   <label for="inputName" id="labelKeySkills" class="col-sm-2 col-form-label">{{labels.labelKeySkills}}<span class="text-danger">*</span></label>
                   <div class="col-sm-10">
-                    <input type="text" formControlName="skillName" class="form-control" placeholder="Skill / software name" required>
+                    <input type="text" formControlName="skillName" class="form-control" placeholder="Skill / software name" required (keypress)="preventDot($event)">
                   </div>
                 </div>
                 <div class="mb-3 mt-2 row">
@@ -711,6 +721,17 @@
                   </div>
                 </div>
                 <div class="mb-3 row">
+                  <label for="currentCompany{{i}}" class="col-sm-2 col-form-label">
+                  </label>
+                  <div class="col-sm-10">
+                    <input type="checkbox"
+                           id="currentCompany{{i}}"
+                           formControlName="currentlyWorking"
+                           (change)="toggleEndDate(i)" />
+                    <label for="currentCompany{{i}}">{{labels.labelCurrentlyWorking}}</label>
+                  </div>
+                </div>
+                <div class="mb-3 row">
                   <label for="startDate{{i}}" id="labelFromDate" class="col-sm-2 col-form-label">{{labels.labelFromDate}}<span class="text-danger">*</span></label>
                   <div class="col-sm-10">
                     <div class="input-group" style="display: flex">
@@ -739,6 +760,7 @@
                              formControlName="endDate"
                              name="endDate"
                              placeholder="dd/mm/yyyy"
+                             [disabled]="experience.get('currentlyWorking')?.value"
                              required />
                       <span class="input-group-text">
                         <span class="material-icons" style="font-size: 17px;">calendar_today</span>

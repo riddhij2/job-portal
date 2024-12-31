@@ -6,7 +6,7 @@ import { Router, RouterLink } from '@angular/router';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
-import { District, LanguageLabels, State } from '../../../Models/JobApplication/language-labels';
+import { District, LanguageLabels, State, SubDivision } from '../../../Models/JobApplication/language-labels';
 import { AddressDetail, BasicDetail, Experience, ExperienceDetail, HealthDetail, JobApplicationFormRequest, JobApplicationFormRequestIO, Language, LanguageDetail, PassportDetail, Qualification, RemoveQualDetail, Resume, Skill, SkillDetail, SocialDetail } from '../../../Models/JobApplication/job-application-form-request';
 import { JobApplicationService } from '../../../Services/JobApplication/job-application.service';
 import { switchMap } from 'rxjs';
@@ -57,10 +57,11 @@ export class JobApplicationITOilComponent {
   resumeModel = new Resume;
   currentStep: number = 1;
   Applicantmodel: HealthDetail = new HealthDetail();
+  subDivisions: SubDivision[] = [];
+  ZoneId = 0;
 
   minDate = new Date(2000, 0, 1);
   maxDate = new Date(2020, 0, 1);
-  ZoneId = 0;
   isFormValid = false;
   savedTabs: boolean[] = [];
   safeResumeUrl!: SafeResourceUrl;
@@ -74,12 +75,13 @@ export class JobApplicationITOilComponent {
     const mobileNo = sessionStorage.getItem('MobileNo');
     this.MobileNo = mobileNo ? JSON.parse(mobileNo) : '';
     this.jobApplicationForm = this.fb.group({
+      revenueId: [0, Validators.required],
       fName: ['', Validators.required],
       mName: [''],
       lName: ['', Validators.required],
       nationality: ['', Validators.required],
       fatherName: ['', Validators.required],
-      fatherMobileNo: ['', Validators.required],
+      fatherMobileNo: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
       vehicleType: ['No', Validators.required],
       drivingLicenseNo: [''],
       dateOfBirth: ['', Validators.required],
@@ -144,6 +146,7 @@ export class JobApplicationITOilComponent {
       this.checkSocialFormValidity();
     });
     this.loadUserData(this.MobileNo);
+    this.GetSubDivision(this.ZoneId);
     this.GetState();
     this.jobApplicationForm.get('stateId')?.setValue(3);
     this.GetCity(3, 'permanent');
@@ -181,6 +184,7 @@ export class JobApplicationITOilComponent {
       // console.log("this.employeeData", this.employeeData)
       const formattedDateOfBirth = this.formatDate(this.employeeData.dateOfBirth);
       this.jobApplicationForm.patchValue({
+        revenueId: this.employeeData.revenueId,
         fName: this.employeeData.name,
         mName: this.employeeData.mName,
         lName: this.employeeData.lName,
@@ -292,21 +296,29 @@ export class JobApplicationITOilComponent {
       }
       if (this.employeeData.experienceDetails.length > 0) {
         this.experiences.clear();
-        this.employeeData.experienceDetails.forEach(exp => {
+        this.employeeData.experienceDetails.forEach((exp, index) => {
           const experienceFormGroup = this.createExperienceTab();
           const formattedStartDate = this.formatDate(exp.startDate);
           const formattedEndDate = this.formatDate(exp.endDate);
           experienceFormGroup.patchValue({
             ...exp,
             startDate: formattedStartDate,
-            endDate: formattedEndDate
+            endDate: formattedEndDate,
+            currentlyWorking: exp.endDate === null ? true : false
           });
           this.experiences.push(experienceFormGroup)
+          if (exp.endDate === null) {
+            this.toggleEndDate(index);
+          }
         })
       }
     });
   }
-
+  preventDot(event: KeyboardEvent): void {
+    if (event.key === '.') {
+      event.preventDefault(); 
+    }
+  }
   onStateChange(event: any, type: string): void {
     const selectedStateId = +event.target.value;
     if (selectedStateId) {
@@ -376,6 +388,7 @@ export class JobApplicationITOilComponent {
     this.applicationData.maritalStatus = this.jobApplicationForm.controls['maritalStatus'].value;
     this.applicationData.emailAddress = this.jobApplicationForm.controls['emailAddress'].value;
     this.applicationData.mobileNo = this.jobApplicationForm.controls['mobileNo'].value;
+    this.applicationData.revenueId = this.jobApplicationForm.controls['revenueId'].value;
     this.jobappservice.AddEmployeeFirst(this.applicationData).subscribe(
       (result: any) => {
         if (result.status == 200) {
@@ -660,7 +673,7 @@ export class JobApplicationITOilComponent {
   changeLabels(language: string): void {
     if (language == 'en') {
       this.labels = {
-        labelDivision: "Sub Division",
+        labelDivision: "Location",
         labelName: "Full Name",
         labelFatherName: "Father's Name",
         labelDOB: "Date of Birth",
@@ -748,11 +761,12 @@ export class JobApplicationITOilComponent {
         labelTwiterId: "Twitter ID",
         labelResumefile: "Resume File",
         labelSocial: "Social Details",
+        labelCurrentlyWorking: "Currently Working Here?",
 
       };
     } else if (language == 'hn') {
       this.labels = {
-        labelDivision: "उप-विभाग",
+        labelDivision: "जगह",
         labelName: "नाम",
         labelFatherName: "पिता का नाम",
         labelDOB: "जन्म तिथि",
@@ -840,6 +854,7 @@ export class JobApplicationITOilComponent {
         labelTwiterId: "ट्विटर आईडी",
         labelResumefile: "रिज़्यूमे फ़ाइल",
         labelSocial: "सामाजिक विवरण",
+        labelCurrentlyWorking: "वर्तमान में यहाँ कार्यरत हैं?",
       };
     }
   }
@@ -1061,6 +1076,7 @@ export class JobApplicationITOilComponent {
       position: ['', Validators.required],
       startDate: ['', Validators.required],
       endDate: ['', Validators.required],
+      currentlyWorking: [false],
       hodName: [''],
       hodMobileNo: [''],
       hodEmail: ['']
@@ -1127,6 +1143,31 @@ export class JobApplicationITOilComponent {
         cDistrictId: '',
       });
       this.districtsForCorrespondenceState = [];
+    }
+  }
+  GetSubDivision(zoneId: number) {
+    this.jobappservice.GetSubDivision(zoneId).subscribe(
+      (result: any) => {
+        if (result != null) {
+          this.subDivisions = result.body;
+        }
+      },
+      (error: any) => {
+        Swal.fire({
+          text: error.message,
+          icon: "error"
+        });
+      });
+  }
+  toggleEndDate(index: number): void {
+    const experience = this.experiences.at(index);
+    const currentlyWorking = experience.get('currentlyWorking')?.value;
+
+    if (currentlyWorking) {
+      experience.get('endDate')?.setValue('');
+      experience.get('endDate')?.disable();
+    } else {
+      experience.get('endDate')?.enable();
     }
   }
 }

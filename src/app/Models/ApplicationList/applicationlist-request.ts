@@ -53,5 +53,9 @@ export class Applicationlist {
   'remark': string = "";
   'status': string = "";
   'loginEmail': string = "";
+  'keySkills': string = "";
+  'projectId': number = 0;
+  'expFrom': number = 0;
+  'expTo': number = 0;
 }
 

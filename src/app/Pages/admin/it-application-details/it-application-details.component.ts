@@ -63,7 +63,6 @@ export class ItApplicationDetailsComponent {
     this.jobappservice.getApplicantDetails(this.Applicantmodel).subscribe((data) => {
          if (data.status == 200) {
          this.employeeData = data.body;
-         console.log("this.employeeData",this.employeeData)
          if (this.employeeData.stateId)
           this.GetCity(Number(this.employeeData.stateId), 'permanent');
         if (this.employeeData.cStateId)

@@ -60,7 +60,7 @@ export const routes: Routes = [
       { path: 'add-zone', component: AddZoneComponent, canActivate: [AuthGuardService] },
       { path: 'add-zone/:id', component: AddZoneComponent, canActivate: [AuthGuardService] },
       { path: 'zone-list', component: ZoneListComponent, canActivate: [AuthGuardService] },
-      { path: 'it-application-details', component: ItApplicationDetailsComponent },
+      { path: 'it-application-details', component: ItApplicationDetailsComponent, canActivate: [AuthGuardService] },
     ]
   }
 ];

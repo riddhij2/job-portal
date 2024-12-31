@@ -20,7 +20,7 @@
               <label for="inputDivision" id="labelDivision" class="col-sm-2 col-form-label">{{labels.labelDivision}}<span class="text-danger">*</span></label>
               <div class="col-sm-10">
                 <select formControlName="revenueId" class="form-select" required>
-                  <option value="0" disabled>Select a Division</option>
+                  <option [value]="0" disabled>Select a Division</option>
                   <option *ngFor="let sd of subDivisions" [value]="sd.id">{{ sd.name }}</option>
                 </select>
               </div>

@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { AuthenticationService } from '../../Services/authentication/authentication.service';
 
 @Component({
   selector: 'app-adminheader',
@@ -8,5 +9,9 @@ import { Component } from '@angular/core';
   styleUrl: './adminheader.component.css'
 })
 export class AdminheaderComponent {
+  constructor(private _auth: AuthenticationService) { }
 
+  toggleSidebar() {
+    this._auth.toggleSidebar();
+  }
 }

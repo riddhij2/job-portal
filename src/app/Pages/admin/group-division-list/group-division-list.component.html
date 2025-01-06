@@ -20,7 +20,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngFor="let item of allGroupDivisionList; let i = index">
+                            <tr *ngFor="let item of paginatedgroupDivisionList; let i = index">
                                 <td>{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
                                 <td>{{item.name}}</td>
                                 <td style="cursor:pointer">{{item.active==1?"Active":"Inactive"}}</td>

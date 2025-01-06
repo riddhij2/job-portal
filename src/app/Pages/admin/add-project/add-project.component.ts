@@ -21,10 +21,8 @@ export class AddProjectComponent {
   projectId: number = 0;
 
   constructor(private fb: FormBuilder, private jobapplyservice: JobApplyService, private route: ActivatedRoute, private router: Router) {
-    const routeProjectId = this.route.snapshot.params['id'];
-    if (routeProjectId) {
-      this.projectId = Number(routeProjectId);
-      this.AddProjects(this.projectId);
+    if (this.route.snapshot.params['id'] != null && this.route.snapshot.params['id'] != '' && this.route.snapshot.params['id'] != 'undefined') {
+      this.GetProjectById(Number(this.route.snapshot.params['id']));
       this.isEditMode = true;
     }
 
@@ -63,19 +61,19 @@ export class AddProjectComponent {
         });
       });
   }
-  AddProjects(projectId: number) {
+  GetProjectById(projectId: number) {
     this.addProject = {
       projectId: projectId,
       groupDivisionId: 0,
       projectName: '',
       active: 1
     }
-    this.jobapplyservice.AddProject(this.addProject).subscribe(
+    this.jobapplyservice.GetProjectById(this.addProject).subscribe(
       (result: any) => {
         if (result.status == 200) {
           const existingData = result.body;
           this.addProject.projectId = existingData.projectId;
-          this.addProject.groupDivisionId = existingData.divisionId;
+          this.addProject.groupDivisionId = existingData.groupDivisionId;
           this.addProject.projectName = existingData.projectName;
           this.addProject.active = existingData.active;
           this.isEditMode = true;

@@ -84,3 +84,10 @@ export class ProjectList {
   'name': string;
   'active': number;
 }
+export class SubDivisionList {
+  'id': number;
+  'revenueTown': string;
+  'name': string;
+  'active': number;
+  'zoneId': number;
+}

@@ -54,7 +54,7 @@ export class ProjectListComponent {
     updatePagination() {
       const startIndex = (this.currentPage - 1) * Number(this.itemsPerPage);
       const endIndex = startIndex + Number(this.itemsPerPage);
-      this.paginatedgroupProjectList = this.ProjectList.slice(startIndex, endIndex);
+      this.paginatedgroupProjectList = this.allProjectList.slice(startIndex, endIndex);
     }
   
     onPageChange(newPage: number) {

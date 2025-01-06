@@ -13,47 +13,47 @@
                     <div class="row g-3">
                         <div class="col-md-4">
                             <label class="form-label">Full Name</label>
-                            <div class="form-label-readonly">{{employeeData.name}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.name}}</div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Father's Name</label>
-                            <div class="form-label-readonly">{{employeeData.fatherName}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.fatherName}}</div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Father's Mobile No</label>
-                            <div class="form-label-readonly">{{employeeData.fatherMobileNo}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.fatherMobileNo}}</div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Nationality</label>
-                            <div class="form-label-readonly">{{employeeData.nationality}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.nationality}}</div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Date of Birth</label>
-                            <div class="form-label-readonly">{{employeeData.dateOfBirth | date:'dd-MM-yyyy'}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.dateOfBirth | date:'dd-MM-yyyy'}}</div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Gender</label>
-                            <div class="form-label-readonly">{{employeeData.gender}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.gender}}</div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Marital Status</label>
-                            <div class="form-label-readonly">{{employeeData.maritalStatus}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.maritalStatus}}</div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Email Address</label>
-                            <div class="form-label-readonly">{{employeeData.emailAddress}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.emailAddress}}</div>
                         </div>
                         <div class="col-md-4">
                           <label class="form-label">Mobile No</label>
-                          <div class="form-label-readonly">{{MobileNo}}</div>
+                          <div class="form-label-readonly heightDiv">{{MobileNo}}</div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Vehicle Type</label>
-                            <div class="form-label-readonly">{{employeeData.vehicleType}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.vehicleType}}</div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Driving Licence No</label>
-                            <div class="form-label-readonly">{{employeeData.drivingLicenseNo}}</div>
+                            <div class="form-label-readonly heightDiv heightDiv">{{employeeData.drivingLicenseNo}}</div>
                         </div>
                         <div class="col-md-4 avatar-upload">
                             <label class="form-label">Upload Face Photo</label>
@@ -70,19 +70,19 @@
                     <div class="row g-3">
                         <div class="col-md-3">
                             <label class="form-label">Skill / Software Name *</label>
-                            <div class="form-label-readonly bg-white">{{skill.skillName}}</div>
+                            <div class="form-label-readonly heightDiv bg-white">{{skill.skillName}}</div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Software Version</label>
-                            <div class="form-label-readonly bg-white">{{skill.softwareVerson}}</div>
+                            <div class="form-label-readonly heightDiv bg-white">{{skill.softwareVerson}}</div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Last Used</label>
-                            <div class="form-label-readonly bg-white">{{skill.lastUsed}}</div>
+                            <div class="form-label-readonly heightDiv bg-white">{{skill.lastUsed}}</div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Experience</label>
-                            <div class="form-label-readonly bg-white">{{skill.experienceYear + '.' + skill.experienceMonth + ' Yr'}}</div>
+                            <div class="form-label-readonly heightDiv bg-white">{{skill.experienceYear + '.' + skill.experienceMonth + ' Yr'}}</div>
                         </div>
                     </div>
                 </div>
@@ -96,15 +96,15 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">Permanent Address</label>
-                            <div class="form-label-readonly">{{employeeData.permanentAddress}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.permanentAddress}}</div>
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">Pincode</label>
-                            <div class="form-label-readonly">{{employeeData.pinCode}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.pinCode}}</div>
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">State</label>
-                            <div class="form-label-readonly">
+                            <div class="form-label-readonly heightDiv">
                                 <ng-container *ngFor="let state of states">
                                     <span *ngIf="state.id === employeeData.stateId">{{ state.name }}</span>
                                   </ng-container>
@@ -112,7 +112,7 @@
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">District</label>
-                            <div class="form-label-readonly"> <ng-container *ngFor="let district of districtsForState">
+                            <div class="form-label-readonly heightDiv"> <ng-container *ngFor="let district of districtsForState">
                                 <span *ngIf="district.id === employeeData.districtId">{{ district.name }}</span>
                               </ng-container>
                             </div>
@@ -121,15 +121,15 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">Correspondence Address</label>
-                            <div class="form-label-readonly">{{employeeData.correspondenceAddress}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.correspondenceAddress}}</div>
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">Pincode</label>
-                            <div class="form-label-readonly">{{employeeData.cPinCode}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.cPinCode}}</div>
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">State</label>
-                            <div class="form-label-readonly"> 
+                            <div class="form-label-readonly heightDiv"> 
                               <ng-container *ngFor="let state of states">
                                 <span *ngIf="state.id === employeeData.cStateId">{{ state.name }}</span>
                               </ng-container>
@@ -137,7 +137,7 @@
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">District</label>
-                            <div class="form-label-readonly"> 
+                            <div class="form-label-readonly heightDiv"> 
                               <ng-container *ngFor="let district of districtsForCorrespondenceState">
                                 <span *ngIf="district.id === employeeData.cDistrictId">{{ district.name }}</span>
                               </ng-container>
@@ -154,37 +154,37 @@
                     <div class="row g-3">
                         <div class="col-md-3">
                             <label class="form-label">Vision</label>
-                            <div class="form-label-readonly">{{employeeData.healthDetails.vision}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.healthDetails.vision}}</div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Diabetes</label>
-                            <div class="form-label-readonly">{{employeeData.healthDetails.diabetes}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.healthDetails.diabetes}}</div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Blood Press.(High/Low)</label>
-                            <div class="form-label-readonly">{{employeeData.healthDetails.bloodPressure}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.healthDetails.bloodPressure}}</div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Heart Aliments</label>
-                            <div class="form-label-readonly">{{employeeData.healthDetails.heartAilments}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.healthDetails.heartAilments}}</div>
                         </div>
                     </div>
                     <div class="row g-3">
                         <div class="col-md-3">
                             <label class="form-label">Other Illness</label>
-                            <div class="form-label-readonly">{{employeeData.healthDetails.anyOtherIllnes}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.healthDetails.anyOtherIllnes}}</div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Last Major Illness</label>
-                            <div class="form-label-readonly">{{employeeData.healthDetails.lastMajorIllness}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.healthDetails.lastMajorIllness}}</div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Last Major Illness Date</label>
-                            <div class="form-label-readonly">{{employeeData.healthDetails.majoreIllnessDate | date:'dd-MM-yyyy' }}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.healthDetails.majoreIllnessDate | date:'dd-MM-yyyy' }}</div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Blood Group</label>
-                            <div class="form-label-readonly">{{employeeData.healthDetails.bloodGroop}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.healthDetails.bloodGroop}}</div>
                         </div>
                     </div>
                 </div>
@@ -198,33 +198,33 @@
                     <div class="row g-3">
                         <div class="col-md-3">
                             <label class="form-label">Passport Number</label>
-                            <div class="form-label-readonly">{{employeeData.passportNo}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.passportNo}}</div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Issued Date</label>
-                            <div class="form-label-readonly">{{employeeData.dateOfIssue | date:'dd-MM-yyyy'}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.dateOfIssue | date:'dd-MM-yyyy'}}</div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Valid Upto</label>
-                            <div class="form-label-readonly">{{employeeData.validUpto | date:'dd-MM-yyyy'}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.validUpto | date:'dd-MM-yyyy'}}</div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Issued By</label>
-                            <div class="form-label-readonly">{{employeeData.issuedBy}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.issuedBy}}</div>
                         </div>
                     </div>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">Passport Address</label>
-                            <div class="form-label-readonly">{{employeeData.passAddress}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.passAddress}}</div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">City</label>
-                            <div class="form-label-readonly">{{employeeData.pCityName}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.pCityName}}</div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Emigration Check</label>
-                            <div class="form-label-readonly">{{employeeData.emigrationChecReq}}</div>
+                            <div class="form-label-readonly heightDiv">{{employeeData.emigrationChecReq}}</div>
                         </div>
                     </div>
                 </div>
@@ -281,21 +281,21 @@
                             <div class="row g-3">
                                 <div class="col-md-6  mt-2">
                                     <label class="form-label">Qualification</label>
-                                    <div class="form-label-readonly bg-white"> 
+                                    <div class="form-label-readonly heightDiv bg-white"> 
                                         {{ qualification.orderNo === 3 ? 'Graduation' : qualification.orderNo === 4 ? 'Post Graduation' : qualification.orderNo === 5 ? 'Others' : 'Unknown' }}
                                     </div>
                                 </div>
                                 <div class="col-md-6  mt-2">
                                     <label class="form-label">Degree</label>
-                                    <div class="form-label-readonly bg-white">{{qualification.degreeName}}</div>
+                                    <div class="form-label-readonly heightDiv bg-white">{{qualification.degreeName}}</div>
                                 </div>
                                 <div class="col-md-6 mt-0">
                                     <label class="form-label">Specialization</label>
-                                    <div class="form-label-readonly bg-white">{{qualification.specialization}}</div>
+                                    <div class="form-label-readonly heightDiv bg-white">{{qualification.specialization}}</div>
                                 </div>
                                 <div class="col-md-6 mt-0">
                                     <label class="form-label">Passing Year</label>
-                                    <div class="form-label-readonly bg-white">{{qualification.passingYear}}</div>
+                                    <div class="form-label-readonly heightDiv bg-white">{{qualification.passingYear}}</div>
                                 </div>
                             </div>
                         </div>
@@ -313,33 +313,33 @@
                     <div class="row g-3">
                         <div class="col-md-3">
                             <label class="form-label">Company Name</label>
-                            <div class="form-label-readonly bg-white">{{experience.companyName}}</div>
+                            <div class="form-label-readonly heightDiv bg-white">{{experience.companyName}}</div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Position</label>
-                            <div class="form-label-readonly bg-white">{{experience.position}}</div>
+                            <div class="form-label-readonly heightDiv bg-white">{{experience.position}}</div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Starting Date</label>
-                            <div class="form-label-readonly bg-white">{{experience.startDate | date:'dd-MM-yyyy'}}</div>
+                            <div class="form-label-readonly heightDiv bg-white">{{experience.startDate | date:'dd-MM-yyyy'}}</div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Leaving Date</label>
-                            <div class="form-label-readonly bg-white">{{experience.endDate | date:'dd-MM-yyyy'}}</div>
+                            <div class="form-label-readonly heightDiv bg-white">{{experience.endDate | date:'dd-MM-yyyy'}}</div>
                         </div>
                     </div>
                     <div class="row g-3">
                         <div class="col-md-4">
                             <label class="form-label">HOD Name</label>
-                            <div class="form-label-readonly bg-white">{{experience.hodName || 'NA'}}</div>
+                            <div class="form-label-readonly heightDiv bg-white">{{experience.hodName || 'NA'}}</div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">HOD Email Address</label>
-                            <div class="form-label-readonly bg-white">{{experience.hodEmail || 'NA'}}</div>
+                            <div class="form-label-readonly heightDiv bg-white">{{experience.hodEmail || 'NA'}}</div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">HOD Mobile No</label>
-                            <div class="form-label-readonly bg-white">{{experience.hodMobileNo || 'NA'}}</div>
+                            <div class="form-label-readonly heightDiv bg-white">{{experience.hodMobileNo || 'NA'}}</div>
                         </div>
                     </div>
                 </div>
@@ -352,19 +352,19 @@
                     <div class="row g-3">
                         <div class="col-md-3">
                             <label class="form-label">Facebook ID</label>
-                            <div class="form-label-readonly bg-white">{{employeeData.facebookId}}</div>
+                            <div class="form-label-readonly heightDiv bg-white">{{employeeData.facebookId}}</div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">LinkedIn ID</label>
-                            <div class="form-label-readonly bg-white">{{employeeData.linkdinId}}</div>
+                            <div class="form-label-readonly heightDiv bg-white">{{employeeData.linkdinId}}</div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Instagram ID</label>
-                            <div class="form-label-readonly bg-white">{{employeeData.instagramId}}</div>
+                            <div class="form-label-readonly heightDiv bg-white">{{employeeData.instagramId}}</div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Twitter ID</label>
-                            <div class="form-label-readonly bg-white">{{employeeData.twiterId}}</div>
+                            <div class="form-label-readonly heightDiv bg-white">{{employeeData.twiterId}}</div>
                         </div>
                         <div class="col-md-12">
                             <label class="form-label">Resume File</label>

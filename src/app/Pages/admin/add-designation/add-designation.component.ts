@@ -20,29 +20,25 @@ export class AddDesignationComponent {
   addDesignation = new AddDesignation;
   GroupDivisionList: any;
   constructor(private fb: FormBuilder, private jobapplyservice: JobApplyService, private route: ActivatedRoute, private router: Router) {
-    // if (this.route.snapshot.params['id'] != null && this.route.snapshot.params['id'] != '' && this.route.snapshot.params['id'] != 'undefined') {
-    //   this.GetDesignationById(Number(this.route.snapshot.params['id']));
-    //   this.isEditMode = true;
-    // }
+    if (this.route.snapshot.params['id'] != null && this.route.snapshot.params['id'] != '' && this.route.snapshot.params['id'] != 'undefined') {
+      this.GetDesignationById(Number(this.route.snapshot.params['id']));
+      this.isEditMode = true;
+    }
     this.DesignationForm = this.fb.group({
       designationId: [0],
       designationName: ['', Validators.required],
       designationCode: ['', Validators.required],
-      groupDivisionId: ['', Validators.required],
+      groupDivisionId: [0, Validators.required],
       active: [1],
     });
+    this.GetGroupdivisions();
   }
   ngOnInit(): void {
-    this.GetGroupdivisions();
-    // const existingData = this.getEditData();
-    const designationId = this.route.snapshot.params['id'];
-    console.log('designationId from Route:', this.route.snapshot.params);
-  if (designationId) {
-    this.GetDesignationById(Number(designationId));
-    this.isEditMode = true;
-  } else {
-    this.isEditMode = false;
-  }
+    const existingData = this.getEditData();
+    if (existingData) {
+      this.isEditMode = true;
+      this.DesignationForm.patchValue(existingData);
+    }
   }
   getEditData() {
     return null;
@@ -75,15 +71,12 @@ export class AddDesignationComponent {
         if (result.status == 200) {
           const existingData = result.body;
           this.addDesignation.designationId = existingData.designationId;
-          this.addDesignation.groupDivisionId = existingData.divisionId;
+          this.addDesignation.groupDivisionId = existingData.groupDivisionId;
           this.addDesignation.designationName = existingData.designationName;
           this.addDesignation.designationCode = existingData.designationCode;
           this.addDesignation.active = existingData.active;
           this.isEditMode = true;
           this.DesignationForm.patchValue(this.addDesignation);
-          if (!this.GroupDivisionList) {
-            this.GetGroupdivisions();
-          }
         }
       },
       (error: any) => {
@@ -99,26 +92,29 @@ export class AddDesignationComponent {
     if (this.DesignationForm.invalid) {
       return;
     }
-  
-    const formData: AddDesignation = this.DesignationForm.value;
-  
+    const formData = this.DesignationForm.value;
     this.jobapplyservice.AddDesignation(formData).subscribe(
       (result: any) => {
         if (result.status === 200) {
           Swal.fire({
-            text: this.isEditMode ? 'Designation updated successfully!' : 'Designation added successfully!',
+            text: 'Designation saved successfully!',
             icon: 'success',
-            confirmButtonText: 'OK',
-          }).then(() => this.router.navigate(['/admin/designation-list']));
+            confirmButtonText: 'OK'
+          }).then((result: { isConfirmed: any; }) => {
+            if (result.isConfirmed) {
+              if (this.isEditMode == true)
+                this.router.navigate(['/admin/designation-list']);
+              else
+                window.location.reload();
+            }
+          });
         }
       },
       (error: any) => {
         Swal.fire({
           text: error.message,
-          icon: 'error',
+          icon: "error"
         });
-      }
-    );
+      });
   }
-  
 }

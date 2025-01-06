@@ -55,7 +55,7 @@ export class DesignationListComponent {
   updatePagination() {
     const startIndex = (this.currentPage - 1) * Number(this.itemsPerPage);
     const endIndex = startIndex + Number(this.itemsPerPage);
-    this.paginatedgroupDesignationList = this.DesignationList.slice(startIndex, endIndex);
+    this.paginatedgroupDesignationList = this.allDesignationList.slice(startIndex, endIndex);
   }
 
   onPageChange(newPage: number) {

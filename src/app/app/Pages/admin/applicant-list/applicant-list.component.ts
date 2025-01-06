@@ -1,10 +1,12 @@
 import { CommonModule, DatePipe, NgFor, NgIf } from '@angular/common';
-import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, ElementRef, ViewChild } from '@angular/core';
+import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink, RouterModule } from '@angular/router';
 import { PaginationComponent } from '../../../include/pagination/pagination.component';
 import { Applicationlist, ApplicationlistRequest } from '../../../Models/ApplicationList/applicationlist-request';
-import { Bank, DesignationItem, LocationItem, ProjectItem, SubDivision } from '../../../Models/JobApplication/language-labels';
+import { HealthDetail, JobApplicationFormRequestIO } from '../../../Models/JobApplication/job-application-form-request';
+import { Bank, DesignationItem, District, LocationItem, ProjectItem, State, SubDivision } from '../../../Models/JobApplication/language-labels';
 import { ApplicantListService } from '../../../Services/ApplicantList/applicant-list.service';
 import { JobApplicationService } from '../../../Services/JobApplication/job-application.service';
 import { JobApplyService } from '../../../Services/JobApply/job-apply.service';
@@ -14,7 +16,7 @@ declare var $: any;
 @Component({
   selector: 'app-applicant-list',
   standalone: true,
-  imports: [NgFor, CommonModule, NgIf, RouterModule, RouterLink, AdminComponent, FormsModule, DatePipe, PaginationComponent],
+  imports: [NgFor, CommonModule, NgIf, RouterModule, RouterLink, AdminComponent, FormsModule, DatePipe, PaginationComponent, ReactiveFormsModule],
   templateUrl: './applicant-list.component.html',
   styleUrl: './applicant-list.component.css'
 })
@@ -45,14 +47,25 @@ export class ApplicantListComponent {
   StatusList: Bank[] = [];
   applicantList: ApplicationlistRequest[] = [];
   applicantReq = new Applicationlist;
-  designations: { id: number, name: string }[] = [];  
+  designations: { id: number, name: string }[] = [];
   locations: { [key: string]: { id: number, name: string }[] } = {};
-  currentPage: number = 1; 
-  itemsPerPage: number = 10; 
-  totalItems: number = 0; 
+  currentPage: number = 1;
+  itemsPerPage: number = 10;
+  totalItems: number = 0;
   totalPages: number = 0;
-  paginatedApplicantList: ApplicationlistRequest[]=[];
-  constructor(private router: Router, private jobapplyservice: JobApplyService, private route: ActivatedRoute, private jobappservice: JobApplicationService, private applicantservice: ApplicantListService) {
+  paginatedApplicantList: ApplicationlistRequest[] = [];
+  @ViewChild('detailmodal') detailmodal: ElementRef | undefined;
+  IsModelShow = false;
+  Applicantmodel: HealthDetail = new HealthDetail();
+  employeeData: JobApplicationFormRequestIO = new JobApplicationFormRequestIO();
+  districtsForState: District[] = [];
+  districtsForCorrespondenceState: District[] = [];
+  MobileNo = '';
+  states: State[] = [];
+  jobApplicationForm: FormGroup = new FormGroup({});
+  safeResumeUrl: SafeResourceUrl | null = null;
+  safeUrls: SafeResourceUrl[] = [];
+  constructor(private router: Router, private jobapplyservice: JobApplyService, private route: ActivatedRoute, private jobappservice: JobApplicationService, private applicantservice: ApplicantListService, private sanitizer: DomSanitizer) {
   }
   ngOnInit(): void {
     this.GetGroupdivisions();
@@ -104,7 +117,7 @@ export class ApplicantListComponent {
   GetLocation(groupId: number) {
     this.jobapplyservice.GetLocation(groupId).subscribe(
       (result: any) => {
-          this.LocationList = result;
+        this.LocationList = result;
       },
       (error: any) => {
         Swal.fire({
@@ -116,7 +129,7 @@ export class ApplicantListComponent {
   GetDesignation(groupId: number) {
     this.jobapplyservice.GetDesignation(groupId).subscribe(
       (result: any) => {
-          this.DesignationList = result;
+        this.DesignationList = result;
       },
       (error: any) => {
         Swal.fire({
@@ -225,15 +238,15 @@ export class ApplicantListComponent {
 
   onPagesizeChange(newPageSize: number) {
     this.itemsPerPage = newPageSize;
-    this.currentPage = 1; 
+    this.currentPage = 1;
     this.calculateTotalPages();
     this.updatePagination();
   }
   ngAfterViewInit(): void {
     $('#datepicker').datepicker({
-      format: 'dd/mm/yyyy', 
-      autoclose: true, 
-      todayHighlight: true, 
+      format: 'dd/mm/yyyy',
+      autoclose: true,
+      todayHighlight: true,
     })
       .on('changeDate', (e: any) => {
         const selectedDate = e.format('dd/mm/yyyy');
@@ -241,17 +254,84 @@ export class ApplicantListComponent {
       });
 
     $('#datepicker1').datepicker({
-      format: 'dd/mm/yyyy', 
-      autoclose: true, 
-      todayHighlight: true, 
+      format: 'dd/mm/yyyy',
+      autoclose: true,
+      todayHighlight: true,
     })
       .on('changeDate', (e: any) => {
         const selectedDate = e.format('dd/mm/yyyy');
         this.formData.toDate = selectedDate;
       });
   }
+  navigateToHome(): void {
+    this.router.navigate(['']);
+  }
+
+  getSafeResumeUrl(filePath: string): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(filePath);
+  }
+
+  getSafeUrl(url: string): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
   showDetail(mobileNo: string) {
-    sessionStorage.setItem('MobileNo', JSON.stringify(mobileNo));
-    this.router.navigate(['/admin/it-application-details'])
+    this.GetState();
+    this.Applicantmodel = {
+      mobileNo: mobileNo,
+    };
+    this.jobappservice.getApplicantDetails(this.Applicantmodel).subscribe((data) => {
+      if (data.status == 200) {
+        this.employeeData = data.body;
+        if (this.employeeData.stateId)
+          this.GetCity(Number(this.employeeData.stateId), 'permanent');
+        if (this.employeeData.cStateId)
+          this.GetCity(Number(this.employeeData.stateId), 'correspondence');
+        this.safeResumeUrl = this.getSafeResumeUrl(this.employeeData.resumeFilePath);
+        this.safeUrls = this.employeeData.qualificationDetails.map(qualification => {
+          return this.getSafeUrl(qualification.imageFile); 
+        });
+        $(this.detailmodal?.nativeElement).modal('show');
+      }
+    },
+      (error: any) => {
+        Swal.fire({
+          text: error.message,
+          icon: "error"
+        });
+      });
+
+  }
+  GetState() {
+    this.jobappservice.GetState(1).subscribe(
+      (result: any) => {
+        if (result != null) {
+          this.states = result.body;
+        }
+      },
+      (error: any) => {
+        Swal.fire({
+          text: error.message,
+          icon: "error"
+        });
+      });
+  }
+  GetCity(stateId: number, type: string) {
+    this.jobappservice.GetCity(stateId).subscribe(
+      (result: any) => {
+        if (result != null) {
+          if (type === 'permanent') {
+            this.districtsForState = result.body;
+          } else if (type === 'correspondence') {
+            this.districtsForCorrespondenceState = result.body;
+          }
+        }
+      },
+      (error: any) => {
+        Swal.fire({
+          text: error.message,
+          icon: "error"
+        });
+      }
+    );
   }
 }

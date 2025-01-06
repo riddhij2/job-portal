@@ -17,8 +17,12 @@ export class AddGroupDivisionComponent {
   isEditMode: boolean = false;
   submitted: boolean = false;
   addGroupDivision = new AddGroupDivision;
+  groupDivisionId = 0;
   constructor(private fb: FormBuilder, private jobapplyservice: JobApplyService, private route: ActivatedRoute, private router: Router) {
-    
+    if (this.route.snapshot.params['id'] != null && this.route.snapshot.params['id'] != '' && this.route.snapshot.params['id'] != 'undefined') {
+      this.GetGroupdivisionById(Number(this.route.snapshot.params['id']));
+      this.isEditMode = true;
+    }
     this.groupDivisionForm = this.fb.group({
       groupDivisionId: [0],
       name: ['', Validators.required],
@@ -26,15 +30,6 @@ export class AddGroupDivisionComponent {
     });
   }
   ngOnInit(): void {
-    const groupDivisionId = this.route.snapshot.params['id'];
-      console.log('Group Division ID from Route:', this.route.snapshot.params);
-  
-      if (groupDivisionId) {
-        this.GetGroupdivisionById(Number(groupDivisionId));
-        this.isEditMode = true;
-      } else {
-        this.isEditMode = false;
-      }
   }
   GetGroupdivisionById(groupDivisionId: number) {
     this.addGroupDivision = {
@@ -46,17 +41,11 @@ export class AddGroupDivisionComponent {
       (result: any) => {
         if (result.status == 200) {
           const existingData = result.body;
-          console.log("existingData", existingData)
           this.addGroupDivision.groupDivisionId = existingData.divisionId;
           this.addGroupDivision.name = existingData.name; 
           this.addGroupDivision.active = existingData.active;
           this.isEditMode = true;
           this.groupDivisionForm.patchValue(this.addGroupDivision);
-          // this.groupDivisionForm.patchValue({
-          //   divisionId: existingData.divisionId,
-          //   name: existingData.name,
-          //   active: existingData.active
-          // });
         }
       },
       (error: any) => {
@@ -71,12 +60,12 @@ export class AddGroupDivisionComponent {
     if (this.groupDivisionForm.invalid) {
       return;
     }
-    const formData: AddGroupDivision = this.groupDivisionForm.value;
+    const formData = this.groupDivisionForm.value;
     this.jobapplyservice.AddGroupDivision(formData).subscribe(
       (result: any) => {
         if (result.status === 200) {
           Swal.fire({
-            text: this.isEditMode ? 'Group division updated successfully!' : 'Group division added successfully!',
+            text: 'Group division saved successfully!',
             icon: 'success',
             confirmButtonText: 'OK'
           }).then((result: { isConfirmed: any; }) => {

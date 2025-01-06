@@ -2,7 +2,7 @@ import { HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AddGroupDivision } from '../../Models/Masters/add-group-division';
+import { AddDesignation, AddGroupDivision, AddProject, AddZone } from '../../Models/Masters/add-group-division';
 import { SendOTPRequest } from '../../Models/SendOTP/send-otprequest';
 import { GlobalService } from '../global/global.service';
 
@@ -65,6 +65,10 @@ export class JobApplyService {
     let url: string = environment.apiUrl + 'Master/GetAllProject';
     return this.http.post(url, null);
   }
+  GetProjectById(model: AddProject): Observable<any> {
+    let url: string = environment.apiUrl + 'Master/GetProjectById';
+    return this.http.post(url, model);
+  }
   GetGroupdivisionById(model: AddGroupDivision): Observable<any> {
     let url: string = environment.apiUrl + 'Master/GetGroupdivisionById';
     return this.http.post(url, model);
@@ -72,5 +76,29 @@ export class JobApplyService {
   AddGroupDivision(model: AddGroupDivision): Observable<any> {
     let url: string = environment.apiUrl + 'Master/AddGroupDivision';
     return this.http.post(url, model);
+  }
+  AddProject(model: AddProject): Observable<any> {
+    let url: string = environment.apiUrl + 'Master/AddProject';
+    return this.http.post(url, model);
+  }
+  AddDesignation(model: AddDesignation): Observable<any>{
+    let url: string = environment.apiUrl + 'Master/AddDesignation';
+    return this.http.post(url, model);
+  }
+  GetDesignationById(model: AddDesignation): Observable<any> {
+    let url: string = environment.apiUrl + 'Master/GetDesignationById';
+    return this.http.post(url, model);
+  }
+  AddZone(model: AddZone): Observable<any> {
+    let url: string = environment.apiUrl + 'Master/AddZone';
+    return this.http.post(url, model);
+  }
+  GetLocationById(model: AddZone): Observable<any> {
+    let url: string = environment.apiUrl + 'Master/GetLocationById';
+    return this.http.post(url, model);
+  }
+  GetAllSubDivision(): Observable<any> {
+    let url: string = environment.apiUrl + 'Master/GetAllSubDivision';
+    return this.http.post(url, null);
   }
 }

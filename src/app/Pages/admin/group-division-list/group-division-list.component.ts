@@ -54,7 +54,7 @@ export class GroupDivisionListComponent {
   updatePagination() {
     const startIndex = (this.currentPage - 1) * Number(this.itemsPerPage);
     const endIndex = startIndex + Number(this.itemsPerPage);
-    this.paginatedgroupDivisionList = this.allDivisionList.slice(startIndex, endIndex);
+    this.paginatedgroupDivisionList = this.allGroupDivisionList.slice(startIndex, endIndex);
   }
 
   onPageChange(newPage: number) {

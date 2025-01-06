@@ -22,7 +22,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngFor="let item of allDesignationList; let i = index">
+                            <tr *ngFor="let item of paginatedgroupDesignationList; let i = index">
                                 <td>{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
                                 <td>{{item.designationName}}</td>
                                 <td>{{item.designationCode}}</td>

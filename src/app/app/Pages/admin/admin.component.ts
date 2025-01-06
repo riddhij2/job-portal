@@ -1,4 +1,4 @@
-import { NgIf } from '@angular/common';
+import { NgClass, NgIf } from '@angular/common';
 import { Component, Renderer2 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink, RouterLinkActive, RouterModule, RouterOutlet } from '@angular/router';
 import { AdminfooterComponent } from '../../include/adminfooter/adminfooter.component';
@@ -8,13 +8,14 @@ import { AuthenticationService } from '../../Services/authentication/authenticat
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [AdminheaderComponent, RouterModule, RouterOutlet, RouterLink, RouterLinkActive, NgIf, AdminfooterComponent],
+  imports: [AdminheaderComponent, RouterModule, RouterOutlet, RouterLink, RouterLinkActive, NgIf, AdminfooterComponent, NgClass],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.css',
 })
 export class AdminComponent {
   isadminPage = false;
   isContentLoaded = false;
+  isSidebarCollapsed = false;
   constructor(private renderer: Renderer2, private route: ActivatedRoute, private router: Router, private _auth: AuthenticationService) { }
   ngOnInit(): void {
     this.isadminPage = this.route.snapshot.routeConfig?.path === 'admin';
@@ -25,6 +26,9 @@ export class AdminComponent {
         this.isContentLoaded = true;
       }, 500);
     }
+    this._auth.getSidebarState().subscribe(state => {
+      this.isSidebarCollapsed = state;
+    });
   }
 
   loadExternalResources() {

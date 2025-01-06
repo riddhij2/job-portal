@@ -54,7 +54,7 @@ constructor(private fb: FormBuilder, private jobapplyservice: JobApplyService, p
   updatePagination() {
     const startIndex = (this.currentPage - 1) * Number(this.itemsPerPage);
     const endIndex = startIndex + Number(this.itemsPerPage);
-    this.paginatedlocationList = this.locationList.slice(startIndex, endIndex);
+    this.paginatedlocationList = this.allLocationList.slice(startIndex, endIndex);
   }
 
   onPageChange(newPage: number) {

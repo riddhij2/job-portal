@@ -32,6 +32,11 @@ export class ApplicationlistRequest {
   'passportPhotopath': string;
   'resumeFilepath': string;
   'maritalStatus': string;
+  'bankName': string;
+  'designationId': number;
+  'zoneId': number;
+  'revenueId': number;
+  'groupDivisionId': number;
 
 }
 export class Applicationlist {
@@ -57,5 +62,8 @@ export class Applicationlist {
   'projectId': number = 0;
   'expFrom': number = 0;
   'expTo': number = 0;
+}
+export class EmployeeDetail {
+  'applicantId': number;
 }
 

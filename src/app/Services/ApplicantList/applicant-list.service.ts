@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AddVacancy } from '../../Models/AddVacancy/add-vacancy';
-import { Applicationlist } from '../../Models/ApplicationList/applicationlist-request';
+import { Applicationlist, EmployeeDetail } from '../../Models/ApplicationList/applicationlist-request';
 import { PostedJobListReq } from '../../Models/JobPosting/job-posting';
 import { SendOTPRequest } from '../../Models/SendOTP/send-otprequest';
 import { GlobalService } from '../global/global.service';
@@ -36,6 +36,14 @@ export class ApplicantListService {
   }
   GetDataForVerify(model: Applicationlist): Observable<any> {
     let url: string = environment.apiUrl + 'Report/GetDataForVerify';
+    return this.http.post(url, model);
+  }
+  UpdateApplicantDetail(model: Applicationlist): Observable<any> {
+    let url: string = environment.apiUrl + 'Report/UpdateApplicantDetail';
+    return this.http.post(url, model);
+  }
+  GetDataApplicantOther(model: EmployeeDetail): Observable<any> {
+    let url: string = environment.apiUrl + 'Report/GetDataApplicantOther';
     return this.http.post(url, model);
   }
   JobList(model: PostedJobListReq): Observable<any> {

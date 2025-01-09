@@ -106,7 +106,7 @@ export class AdminDashboardComponent {
       this.groupedData[item.groupDivisionName].push(item);
     });
     Object.keys(this.groupedData).forEach((key, index) => {
-      this.activeTabs[index] = 'year';
+      this.activeTabs[index] = 'month';
     });
   }
   groupDataByTypeMonth(): void {
@@ -118,7 +118,7 @@ export class AdminDashboardComponent {
       this.groupedDataMonth[item.groupDivisionName].push(item);
     });
     Object.keys(this.groupedDataMonth).forEach((key, index) => {
-      this.activeTabs[index] = 'year';
+      this.activeTabs[index] = 'month';
     });
   }
 }

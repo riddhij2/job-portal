@@ -8,11 +8,21 @@
         <div class="col-md-6">
           <div class="form-group mb-3">
             <label for="inputZone" class="form-label width-180">Zone</label>
-            <label class="form-label">{{applicantData.zoneName}}</label>
+            <div class="col-md">
+              <select class="form-select" id="inputZone" formControlName="zoneId" required (change)="OnZoneChange($event)">
+                <option value="0" disabled selected>Select Zone Name</option>
+                <option *ngFor="let item of LocationList" [value]="item.locationId">{{ item.location }}</option>
+              </select>
+            </div>
           </div>
           <div class="form-group mb-3">
             <label for="inputDesignation" class="form-label width-180">Designation</label>
-            <label class="form-label">{{applicantData.designationName}}</label>
+            <div class="col-md">
+              <select class="form-select" id="inputDesignation" formControlName="designationId" required>
+                <option value="0" disabled selected>Select Designation Name</option>
+                <option *ngFor="let designation of DesignationList" [value]="designation.designationId">{{ designation.designationName }}</option>
+              </select>
+            </div>
           </div>
           <div class="form-group mb-3">
             <label for="inputName" class="form-label width-180">Name</label>
@@ -49,7 +59,7 @@
                 <img [src]="applicantData.adharpath" alt="Aadhar Document" class="img-fluid" style="width: 550px;">
               </ng-container>
               <ng-template #pdfTemplate4>
-                <embed [src]="safeadharpathUrl" type="application/pdf" width="100%" height="600px">
+                <embed [src]="safeadharpathUrl" type="application/pdf" width="100%" height="600px" *ngIf="safeadharpathUrl">
               </ng-template>
             </div>
           </div>
@@ -65,17 +75,17 @@
                 <img [src]="applicantData.pancardpath" alt="Pan Document" class="img-fluid" style="width: 550px;">
               </ng-container>
               <ng-template #pdfTemplate3>
-                <embed [src]="safepancardpathUrl" type="application/pdf" width="100%" height="600px">
+                <embed [src]="safepancardpathUrl" type="application/pdf" width="100%" height="600px" *ngIf="safepancardpathUrl">
               </ng-template>
             </div>
           </div>
           <div class="form-group mb-3 d-block" *ngIf="safeQualificationUrl">
             <label for="inputQualification" class="form-label width-180 mt-3">Qualification</label>
-            <div class="scroll-container" style="width: 550px; height: 290px">
+            <div class="scroll-container" style=" height: 290px">
               <embed [src]="safeQualificationUrl" type="application/pdf" width="100%" height="100%">
             </div>
           </div>
-          <div class="form-group mb-3">
+          <div class="form-group mb-3" *ngIf="applicantId===0">
             <label for="inputBankName" id="labelBankName" class="form-label width-180">
               {{labels.labelBankName}}
               Company Name
@@ -92,7 +102,12 @@
         <div class="col-md-6">
           <div class="form-group mb-3">
             <label for="inputSubDivision" class="form-label width-180">Sub Division</label>
-            <label class="form-label">{{applicantData.revenueTown}}</label>
+            <div class="col-md">
+              <select class="form-select" id="inputSubDivision" formControlName="subdivisionId" required>
+                <option value="0" disabled selected>Select Sub Division Name</option>
+                <option *ngFor="let item of subDivisions" [value]="item.id">{{ item.name }}</option>
+              </select>
+            </div>
           </div>
           <div class="form-group mb-3" style="margin-top: 4rem;">
             <label for="inputFName" class="form-label width-180">Father Name</label>
@@ -154,7 +169,7 @@
                 <img [src]="applicantData.bankDocumentpath" alt="Bank Document" class="img-fluid" style="width: 550px;">
               </ng-container>
               <ng-template #pdfTemplate1>
-                <embed [src]="safebankDocumentpathUrl" type="application/pdf" width="100%" height="600px">
+                <embed [src]="safebankDocumentpathUrl" type="application/pdf" width="100%" height="600px" *ngIf="safebankDocumentpathUrl">
               </ng-template>
             </div>
           </div>
@@ -165,18 +180,18 @@
                 <img [src]="applicantData.passportPhotopath" alt="Bank Document" class="img-fluid" style="width: 550px;">
               </ng-container>
               <ng-template #pdfTemplate2>
-                <embed [src]="safepassportPhotopathUrl" type="application/pdf" width="100%" height="600px">
+                <embed [src]="safepassportPhotopathUrl" type="application/pdf" width="100%" height="600px" *ngIf="safepassportPhotopathUrl">
               </ng-template>
             </div>
 
             <div class="form-group mb-3 d-block">
               <label for="inputResume" class="form-label width-180 mt-2">Resume</label>
-              <div class="scroll-container" style="width: 550px; height: 230px">
+              <div class="scroll-container" style="width: 550px; height: 244px">
                 <embed [src]="safeResumeUrl" type="application/pdf" width="100%" height="100%" *ngIf="safeResumeUrl">
               </div>
             </div>
           </div>
-          <div class="form-group mb-3">
+          <div class="form-group mb-3" *ngIf="applicantId===0">
             <label for="inputremark" class="form-label width-180">Remark</label>
             <textarea type="text" class="form-control" formControlName="remark" rows="1"></textarea>
           </div>
@@ -184,12 +199,17 @@
       </div>
       <br>
       <div class="row">
-        <div class="d-flex justify-content-between">
+        <div class="d-flex justify-content-between" *ngIf="applicantId===0">
           <div class="col-md-6 text-end">
             <button class="btn btn-success" type="button" [disabled]="verifyEmployeeForm.invalid" (click)="onVerify()">Verified/Hired</button>
           </div>
           <div class="col-md-6">
             <button class="btn btn-danger" type="button" [disabled]="verifyEmployeeForm.get('remark')?.invalid" (click)="onRejectNext()">Reject/Next</button>
+          </div>
+        </div>
+        <div class="d-flex justify-content-between" *ngIf="applicantId!=0">
+          <div class="col-md-6 text-end">
+            <button class="btn btn-success" type="button" (click)="onEditApplicant()">Save</button>
           </div>
         </div>
       </div>

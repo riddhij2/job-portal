@@ -4,10 +4,11 @@ import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink, RouterModule } from '@angular/router';
 import { PaginationComponent } from '../../../include/pagination/pagination.component';
-import { Applicationlist, ApplicationlistRequest } from '../../../Models/ApplicationList/applicationlist-request';
+import { Applicationlist, ApplicationlistRequest, EmployeeDetail } from '../../../Models/ApplicationList/applicationlist-request';
 import { HealthDetail, JobApplicationFormRequestIO } from '../../../Models/JobApplication/job-application-form-request';
 import { Bank, DesignationItem, District, LocationItem, ProjectItem, State, SubDivision } from '../../../Models/JobApplication/language-labels';
 import { ApplicantListService } from '../../../Services/ApplicantList/applicant-list.service';
+import { FilterService } from '../../../Services/Filter/filter.service';
 import { JobApplicationService } from '../../../Services/JobApplication/job-application.service';
 import { JobApplyService } from '../../../Services/JobApply/job-apply.service';
 import { AdminComponent } from '../admin.component';
@@ -55,6 +56,7 @@ export class ApplicantListComponent {
   totalPages: number = 0;
   paginatedApplicantList: ApplicationlistRequest[] = [];
   @ViewChild('detailmodal') detailmodal: ElementRef | undefined;
+  @ViewChild('otherdetailmodal') otherdetailmodal: ElementRef | undefined;
   IsModelShow = false;
   Applicantmodel: HealthDetail = new HealthDetail();
   employeeData: JobApplicationFormRequestIO = new JobApplicationFormRequestIO();
@@ -65,10 +67,34 @@ export class ApplicantListComponent {
   jobApplicationForm: FormGroup = new FormGroup({});
   safeResumeUrl: SafeResourceUrl | null = null;
   safeUrls: SafeResourceUrl[] = [];
-  constructor(private router: Router, private jobapplyservice: JobApplyService, private route: ActivatedRoute, private jobappservice: JobApplicationService, private applicantservice: ApplicantListService, private sanitizer: DomSanitizer) {
+  applicantData: ApplicationlistRequest = new ApplicationlistRequest();
+  safeQualificationUrl: SafeResourceUrl | null = null;
+  safepassportPhotopathUrl: SafeResourceUrl | null = null;
+  safebankDocumentpathUrl: SafeResourceUrl | null = null;
+  safepancardpathUrl: SafeResourceUrl | null = null;
+  safeadharpathUrl: SafeResourceUrl | null = null;
+  banks: Bank[] = [];
+  constructor(private router: Router, private jobapplyservice: JobApplyService, private route: ActivatedRoute, private jobappservice: JobApplicationService,
+    private applicantservice: ApplicantListService, private sanitizer: DomSanitizer, private filterService: FilterService) {
   }
   ngOnInit(): void {
+    this.restoreState();
     this.GetGroupdivisions();
+    this.showOptions(this.formData.groupDivision);
+    this.GetBankName();
+  }
+
+  restoreState() {
+    const savedFilters = this.filterService.getFilters();
+    const savedPagination = this.filterService.getPagination();
+    if (Object.keys(savedFilters).length) {
+      this.formData = savedFilters;
+      this.GetSearchDataPhotoSmart()
+    }
+    if (savedPagination.currentPage) {
+      this.currentPage = savedPagination.currentPage;
+      this.itemsPerPage = savedPagination.itemsPerPage;
+    }
     const sessionData = sessionStorage.getItem('groupParams');
     if (sessionData) {
       const parsedData = JSON.parse(sessionData);
@@ -79,13 +105,26 @@ export class ApplicantListComponent {
       this.type = parsedData.type;
       this.GetDataDashboardLinked();
     }
-    this.showOptions(this.formData.groupDivision);
   }
   GetGroupdivisions() {
     this.jobapplyservice.GetGroupdivisions().subscribe(
       (result: any) => {
         if (result.status == 200) {
           this.GroupDivisionList = result.body;
+        }
+      },
+      (error: any) => {
+        Swal.fire({
+          text: error.message,
+          icon: "error"
+        });
+      });
+  }
+  GetBankName() {
+    this.jobappservice.GetBankName().subscribe(
+      (result: any) => {
+        if (result != null) {
+          this.banks = result.body;
         }
       },
       (error: any) => {
@@ -218,8 +257,13 @@ export class ApplicantListComponent {
       });
   }
   onSubmit() {
+    this.clearState();
     this.GetSearchDataPhotoSmart();
     this.groupid = Number(this.formData.groupDivision)
+  }
+  clearState() {
+    this.filterService.setFilters({});
+    this.filterService.setPagination({ currentPage: 1, itemsPerPage: 10 });
   }
   calculateTotalPages() {
     this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
@@ -301,6 +345,45 @@ export class ApplicantListComponent {
       });
 
   }
+  showDetailOther(applicantId: number) {
+    const model = new EmployeeDetail();
+    model.applicantId = applicantId;
+    this.GetState();
+    this.applicantservice.GetDataApplicantOther(model).subscribe(
+      (data) => {
+        if (data.status == 200 && data.body.length > 0) {
+          this.applicantData = data.body[0];
+          const bank = this.banks.find(b => b.id === this.applicantData.bankId);
+          this.applicantData.bankName = bank ? bank.name : "";
+          this.safeQualificationUrl = this.getSafeUrl(this.applicantData.qualificationpath);
+          this.safeadharpathUrl = this.getSafeUrl(this.applicantData.adharpath);
+          this.safepancardpathUrl = this.getSafeUrl(this.applicantData.pancardpath);
+          this.safebankDocumentpathUrl = this.getSafeUrl(this.applicantData.bankDocumentpath);
+          this.safepassportPhotopathUrl = this.getSafeUrl(this.applicantData.passportPhotopath);
+          this.safeResumeUrl = this.getSafeUrl(this.applicantData.resumeFilepath);
+          $(this.otherdetailmodal?.nativeElement).modal('show');
+        }
+      },
+      (error: any) => {
+        Swal.fire({
+          text: error.message,
+          icon: "error"
+        });
+      }
+    );
+  }
+  getFormattedAge(): string {
+    const age = this.applicantData?.age || "0:0";
+    const [years, months] = age.split(':').map(Number);
+    return `${years} years and ${months} months`;
+  }
+  isImage(filePath: string | undefined | null): boolean {
+    if (!filePath) {
+      return false;
+    }
+    const ext = filePath.split('.').pop()?.toLowerCase();
+    return ext === 'jpg' || ext === 'jpeg' || ext === 'png';
+  }
   GetState() {
     this.jobappservice.GetState(1).subscribe(
       (result: any) => {
@@ -333,5 +416,13 @@ export class ApplicantListComponent {
         });
       }
     );
+  }
+  navigateToEdit(applicantId: number) {
+    this.filterService.setFilters(this.formData);
+    this.filterService.setPagination({
+      currentPage: this.currentPage,
+      itemsPerPage: this.itemsPerPage,
+    });
+    this.router.navigate([`/admin/verify-employee/${applicantId}`]);
   }
 }

@@ -23,7 +23,6 @@ export class PaginationComponent {
   constructor() { }
 
   changePage(page: number): void {
-    debugger;
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
       this.pageChanged.emit(page);
@@ -42,7 +41,6 @@ export class PaginationComponent {
     this.pagesizeChanged.emit(this.itemsPerPage);
   }
   generateVisiblePages(): void {
-    debugger;
     const visiblePageCount = 5;
     const halfVisiblePages = Math.floor(visiblePageCount / 2);
     let startPage = Math.max(1, this.currentPage - halfVisiblePages);

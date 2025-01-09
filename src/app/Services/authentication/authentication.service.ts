@@ -9,7 +9,7 @@ import { GlobalService } from '../global/global.service';
 })
 export class AuthenticationService {
   public isAuthenticated = false;
-  private isSidebarCollapsed = new BehaviorSubject<boolean>(false);
+  private isSidebarCollapsed = new BehaviorSubject<boolean>(true);
   constructor(private http: GlobalService) { }
 
   getLoginUser(loginInfo: Login): Observable<any> {

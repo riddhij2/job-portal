@@ -50,6 +50,7 @@ export const routes: Routes = [
       { path: 'add-vacancy', component: AddVacanciesComponent, canActivate: [AuthGuardService] },
       { path: 'add-vacancy/:id', component: AddVacanciesComponent, canActivate: [AuthGuardService] },
       { path: 'verify-employee', component: VerifyEmployeeComponent, canActivate: [AuthGuardService] },
+      { path: 'verify-employee/:id', component: VerifyEmployeeComponent, canActivate: [AuthGuardService] },
       { path: 'add-group-division', component: AddGroupDivisionComponent, canActivate: [AuthGuardService] },
       { path: 'add-group-division/:id', component: AddGroupDivisionComponent, canActivate: [AuthGuardService] },
       { path: 'group-division-list', component: GroupDivisionListComponent, canActivate: [AuthGuardService] },

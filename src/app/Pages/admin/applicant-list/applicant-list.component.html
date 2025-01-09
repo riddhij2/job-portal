@@ -177,6 +177,7 @@
                 <th>Revenue Town</th>
                 <th>Designation Name</th>
                 <th>Status</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -189,7 +190,9 @@
                     </a>
                   </ng-container>
                   <ng-template #defaultTemplate>
-                    {{item.name}}
+                    <a (click)="showDetailOther(item.applicantId)" style="color: rgb(13 110 253); cursor: pointer;">
+                      {{item.name}}
+                    </a>
                   </ng-template>
                 </td>
                 <td>{{item.gender}}</td>
@@ -201,6 +204,21 @@
                 <td>{{item.revenueTown}}</td>
                 <td>{{item.designationName}}</td>
                 <td [title]="item.statusName+' by '+item.createdBy" style="cursor:pointer">{{item.statusName}}</td>
+                <td>
+                  <a *ngIf="item.statusName === 'Applied'" class="btn p-0 fs-4" (click)="navigateToEdit(item.applicantId)">
+                    <i class="entypo entypo-pencil"></i> |
+                  </a>
+                  <ng-container *ngIf="groupid === 1; else defaultTemplate1">
+                    <a (click)="showDetail(item.mobileNo)" class="btn p-0 fs-4">
+                      <i class="entypo entypo-eye"></i>
+                    </a>
+                  </ng-container>
+                  <ng-template #defaultTemplate1>
+                    <a (click)="showDetailOther(item.applicantId)" class="btn p-0 fs-4">
+                      <i class="entypo entypo-eye"></i>
+                    </a>
+                  </ng-template>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -618,6 +636,180 @@
             </div>
           </form>
 
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal" #otherdetailmodal id="otherdetailmodal" tabindex="-1" aria-labelledby="patternModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="otherdetailmodalLabel">Applicant Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body fs-4">
+        <div class="mt-4">
+          <div class="form-container">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group mb-3">
+                  <label for="inputZone" class="form-label width-180">Zone</label>
+                  <label class="form-label">{{applicantData.zoneName}}</label>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="inputDesignation" class="form-label width-180">Designation</label>
+                  <label class="form-label">{{applicantData.designationName}}</label>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="inputName" class="form-label width-180">Name</label>
+                  <label class="form-label">{{applicantData.name}}</label>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="inputGender" class="form-label width-180">Gender</label>
+                  <label class="form-label">{{applicantData.gender}}</label>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="inputDOB" class="form-label width-180">Date of birth</label>
+                  <label class="form-label">{{applicantData.dateOfBirth | date:'dd-MM-yyyy'}}</label>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="inputAge" class="form-label width-180">Age</label>
+                  <label class="form-label">{{ getFormattedAge() }}</label>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="inputEmail" class="form-label width-180">Email</label>
+                  <label class="form-label">{{applicantData.emailAddress}}</label>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="inputPermanentAddress" class="form-label width-180">Permanent Address</label>
+                  <label class="form-label">{{applicantData.permanentAddress +'- '+ applicantData.pinCode}}</label>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="inputAadharNo" class="form-label width-180">Aadhar No</label>
+                  <label class="form-label">{{applicantData.adharNo}}</label>
+                </div>
+                <div class="form-group mb-3 d-block">
+                  <label for="inputAdharFile" class="form-label width-180 mt-3">Aadhar Image</label>
+                  <div class="scroll-container">
+                    <ng-container *ngIf="isImage(applicantData.adharpath); else pdfTemplate4">
+                      <img [src]="applicantData.adharpath" alt="Aadhar Document" class="img-fluid" style="width: 550px;">
+                    </ng-container>
+                    <ng-template #pdfTemplate4>
+                      <embed [src]="safeadharpathUrl" type="application/pdf" width="100%" height="350px" *ngIf="safeadharpathUrl">
+                    </ng-template>
+                  </div>
+                </div>
+                <div style="margin-top: 4rem;"></div>
+                <div class="form-group mb-3">
+                  <label for="inputPanNo" class="form-label width-180">PAN No</label>
+                  <label class="form-label">{{applicantData.panNo}}</label>
+                </div>
+                <div class="form-group mb-3 d-block">
+                  <label for="inputPanFile" class="form-label width-180 mt-3">PAN Image</label>
+                  <div class="scroll-container">
+                    <ng-container *ngIf="isImage(applicantData.pancardpath); else pdfTemplate3">
+                      <img [src]="applicantData.pancardpath" alt="Pan Document" class="img-fluid" style="width: 550px;">
+                    </ng-container>
+                    <ng-template #pdfTemplate3>
+                      <embed [src]="safepancardpathUrl" type="application/pdf" width="100%" height="350px" *ngIf="safepancardpathUrl">
+                    </ng-template>
+                  </div>
+                </div>
+                <div class="form-group mb-3 d-block" *ngIf="safeQualificationUrl">
+                  <label for="inputQualification" class="form-label width-180 mt-3">Qualification</label>
+                  <div class="scroll-container" style=" height: 290px">
+                    <embed [src]="safeQualificationUrl" type="application/pdf" width="100%" height="100%" *ngIf="safeQualificationUrl">
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-group mb-3">
+                  <label for="inputSubDivision" class="form-label width-180">Sub Division</label>
+                  <label class="form-label">{{applicantData.revenueTown}}</label>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="inputFName" class="form-label width-180">Father Name</label>
+                  <label class="form-label">{{applicantData.fatherName}}</label>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="inputMaritalStatus" class="form-label width-180">Martial Status</label>
+                  <label class="form-label">{{applicantData.maritalStatus}}</label>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="inputMobileNo" class="form-label width-180">Mobile No.</label>
+                  <label class="form-label">{{applicantData.mobileNo}}</label>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="inputFatherMobileNo" class="form-label width-180">Father Mobile No.</label>
+                  <label class="form-label">{{applicantData.fatherMobileNo}}</label>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="inputUANNo" class="form-label width-180">UAN NO</label>
+                  <label class="form-label">{{applicantData.uanNo}}</label>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="inputCorrespondenceAddress" class="form-label width-180">Correspondence Address</label>
+                  <label class="form-label">{{applicantData.cAddress +'- '+applicantData.cPinCode}}</label>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="inputESINo" class="form-label width-180">ESI NO</label>
+                  <label class="form-label">{{applicantData.esiNo}}</label>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="inputMRID" class="form-label width-180">MRID</label>
+                  <label class="form-label">{{applicantData.mrid}}</label>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="inputBankName" id="labelBankName" class="form-label width-180">Bank Name</label>
+                  <label class="form-label">{{applicantData.bankName}}</label>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="inputBankAccountNo" class="form-label width-180">Bank A/c No</label>
+                  <label class="form-label">{{applicantData.bankAccountNo}}</label>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="inputIFSCCode" class="form-label width-180">IFSC Code</label>
+                  <label class="form-label">{{applicantData.ifscCode}}</label>
+                </div>
+
+                <div class="form-group mb-3 d-block">
+                  <label for="inputBankStatementFile" class="form-label width-180 mt-3">Bank Image</label>
+                  <div class="scroll-container">
+                    <ng-container *ngIf="isImage(applicantData.bankDocumentpath); else pdfTemplate1">
+                      <img [src]="applicantData.bankDocumentpath" alt="Bank Document" class="img-fluid" style="width: 550px;">
+                    </ng-container>
+                    <ng-template #pdfTemplate1>
+                      <embed [src]="safebankDocumentpathUrl" type="application/pdf" width="100%" height="300px" *ngIf="safebankDocumentpathUrl">
+                    </ng-template>
+                  </div>
+                </div>
+                <div class="form-group mb-3 d-block">
+                  <label for="inputPassportPhoto" class="form-label width-180 mt-3">Photo</label>
+                  <div class="scroll-container">
+                    <ng-container *ngIf="isImage(applicantData.passportPhotopath); else pdfTemplate2">
+                      <img [src]="applicantData.passportPhotopath" alt="Bank Document" class="img-fluid" style="width: 550px;">
+                    </ng-container>
+                    <ng-template #pdfTemplate2>
+                      <embed [src]="safepassportPhotopathUrl" type="application/pdf" width="100%" height="350px" *ngIf="safepassportPhotopathUrl">
+                    </ng-template>
+                  </div>
+
+                  <div class="form-group mb-3 d-block" *ngIf="safeResumeUrl">
+                    <label for="inputResume" class="form-label width-180 mt-2">Resume</label>
+                    <div class="scroll-container" style=" height: 300px">
+                      <embed [src]="safeResumeUrl" type="application/pdf" width="100%" height="100%" *ngIf="safeResumeUrl">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <br>
+          </div>
         </div>
       </div>
       <div class="modal-footer">

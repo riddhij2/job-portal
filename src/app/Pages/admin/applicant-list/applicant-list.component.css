@@ -234,4 +234,11 @@
 .modal-dialog {
   width: auto;
 }
+.custom-centered-alert {
+  position: fixed !important;
+  top: 20% !important;
+  left: 42% !important;
+}
+
+
 

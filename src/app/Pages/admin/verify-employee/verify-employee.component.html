@@ -85,7 +85,7 @@
               <embed [src]="safeQualificationUrl" type="application/pdf" width="100%" height="100%">
             </div>
           </div>
-          <div class="form-group mb-3" *ngIf="applicantId===0">
+          <div class="form-group mb-3">
             <label for="inputBankName" id="labelBankName" class="form-label width-180">
               {{labels.labelBankName}}
               Company Name
@@ -191,7 +191,7 @@
               </div>
             </div>
           </div>
-          <div class="form-group mb-3" *ngIf="applicantId===0">
+          <div class="form-group mb-3">
             <label for="inputremark" class="form-label width-180">Remark</label>
             <textarea type="text" class="form-control" formControlName="remark" rows="1"></textarea>
           </div>
@@ -199,17 +199,12 @@
       </div>
       <br>
       <div class="row">
-        <div class="d-flex justify-content-between" *ngIf="applicantId===0">
+        <div class="d-flex justify-content-between">
           <div class="col-md-6 text-end">
             <button class="btn btn-success" type="button" [disabled]="verifyEmployeeForm.invalid" (click)="onVerify()">Verified/Hired</button>
           </div>
           <div class="col-md-6">
             <button class="btn btn-danger" type="button" [disabled]="verifyEmployeeForm.get('remark')?.invalid" (click)="onRejectNext()">Reject/Next</button>
-          </div>
-        </div>
-        <div class="d-flex justify-content-between" *ngIf="applicantId!=0">
-          <div class="col-md-6 text-end">
-            <button class="btn btn-success" type="button" (click)="onEditApplicant()">Save</button>
           </div>
         </div>
       </div>

@@ -1,14 +1,14 @@
 import { CommonModule, DatePipe, NgFor, NgIf } from '@angular/common';
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink, RouterModule } from '@angular/router';
 import { PaginationComponent } from '../../../include/pagination/pagination.component';
 import { Applicationlist, ApplicationlistRequest, EmployeeDetail } from '../../../Models/ApplicationList/applicationlist-request';
 import { HealthDetail, JobApplicationFormRequestIO } from '../../../Models/JobApplication/job-application-form-request';
 import { Bank, DesignationItem, District, LocationItem, ProjectItem, State, SubDivision } from '../../../Models/JobApplication/language-labels';
+import { UserSession } from '../../../Models/UserSession/user-session';
 import { ApplicantListService } from '../../../Services/ApplicantList/applicant-list.service';
-import { FilterService } from '../../../Services/Filter/filter.service';
 import { JobApplicationService } from '../../../Services/JobApplication/job-application.service';
 import { JobApplyService } from '../../../Services/JobApply/job-apply.service';
 import { AdminComponent } from '../admin.component';
@@ -57,6 +57,7 @@ export class ApplicantListComponent {
   paginatedApplicantList: ApplicationlistRequest[] = [];
   @ViewChild('detailmodal') detailmodal: ElementRef | undefined;
   @ViewChild('otherdetailmodal') otherdetailmodal: ElementRef | undefined;
+  @ViewChild('editothermodal') editothermodal: ElementRef | undefined;
   IsModelShow = false;
   Applicantmodel: HealthDetail = new HealthDetail();
   employeeData: JobApplicationFormRequestIO = new JobApplicationFormRequestIO();
@@ -74,27 +75,24 @@ export class ApplicantListComponent {
   safepancardpathUrl: SafeResourceUrl | null = null;
   safeadharpathUrl: SafeResourceUrl | null = null;
   banks: Bank[] = [];
+  verifyEmployeeForm: FormGroup;
+  usession = new UserSession;
   constructor(private router: Router, private jobapplyservice: JobApplyService, private route: ActivatedRoute, private jobappservice: JobApplicationService,
-    private applicantservice: ApplicantListService, private sanitizer: DomSanitizer, private filterService: FilterService) {
+    private applicantservice: ApplicantListService, private sanitizer: DomSanitizer, private fb: FormBuilder) {
+    this.verifyEmployeeForm = this.fb.group({
+      bankId: [0, Validators.required],
+      designationId: [0, Validators.required],
+      subdivisionId: [0, Validators.required],
+      zoneId: [0, Validators.required],
+      bankAccountNo: [""],
+      panNo: [""],
+      adharNo: [""],
+      ifscCode: [""],
+      loginEmail: [""],
+    });
+    this.usession = JSON.parse((sessionStorage.getItem('session') || '{}'));
   }
   ngOnInit(): void {
-    this.restoreState();
-    this.GetGroupdivisions();
-    this.showOptions(this.formData.groupDivision);
-    this.GetBankName();
-  }
-
-  restoreState() {
-    const savedFilters = this.filterService.getFilters();
-    const savedPagination = this.filterService.getPagination();
-    if (Object.keys(savedFilters).length) {
-      this.formData = savedFilters;
-      this.GetSearchDataPhotoSmart()
-    }
-    if (savedPagination.currentPage) {
-      this.currentPage = savedPagination.currentPage;
-      this.itemsPerPage = savedPagination.itemsPerPage;
-    }
     const sessionData = sessionStorage.getItem('groupParams');
     if (sessionData) {
       const parsedData = JSON.parse(sessionData);
@@ -105,6 +103,9 @@ export class ApplicantListComponent {
       this.type = parsedData.type;
       this.GetDataDashboardLinked();
     }
+    this.GetGroupdivisions();
+    this.showOptions(this.formData.groupDivision);
+    this.GetBankName();
   }
   GetGroupdivisions() {
     this.jobapplyservice.GetGroupdivisions().subscribe(
@@ -257,13 +258,8 @@ export class ApplicantListComponent {
       });
   }
   onSubmit() {
-    this.clearState();
     this.GetSearchDataPhotoSmart();
     this.groupid = Number(this.formData.groupDivision)
-  }
-  clearState() {
-    this.filterService.setFilters({});
-    this.filterService.setPagination({ currentPage: 1, itemsPerPage: 10 });
   }
   calculateTotalPages() {
     this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
@@ -417,12 +413,97 @@ export class ApplicantListComponent {
       }
     );
   }
-  navigateToEdit(applicantId: number) {
-    this.filterService.setFilters(this.formData);
-    this.filterService.setPagination({
-      currentPage: this.currentPage,
-      itemsPerPage: this.itemsPerPage,
-    });
-    this.router.navigate([`/admin/verify-employee/${applicantId}`]);
+  showEditModel(applicantId: number) {
+    this.fetchApplicationDataById(applicantId);
+    $(this.editothermodal?.nativeElement).modal('show');
+  }
+  fetchApplicationDataById(applicantId: number) {
+    const model = new EmployeeDetail();
+    model.applicantId = applicantId;
+    this.applicantservice.GetDataApplicantOther(model).subscribe(
+      (data) => {
+        if (data.status == 200 && data.body.length > 0) {
+          this.applicantData = data.body[0];
+          this.GetDesignation(this.applicantData.groupDivisionId);
+          this.GetLocation(this.applicantData.groupDivisionId);
+          this.GetSubDivision(this.applicantData.zoneId.toString());
+          this.verifyEmployeeForm.patchValue({
+            adharNo: this.applicantData.adharNo,
+            panNo: this.applicantData.panNo,
+            bankAccountNo: this.applicantData.bankAccountNo,
+            ifscCode: this.applicantData.ifscCode,
+            bankId: this.applicantData.bankId,
+            designationId: this.applicantData.designationId,
+            zoneId: this.applicantData.zoneId,
+            subdivisionId: this.applicantData.revenueId,
+          });
+
+          if (this.applicantData.qualificationpath) {
+            this.safeQualificationUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
+              this.applicantData.qualificationpath
+            )
+          }
+          if (this.applicantData.adharpath) {
+            this.safeadharpathUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
+              this.applicantData.adharpath
+            )
+          }
+          if (this.applicantData.pancardpath) {
+            this.safepancardpathUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
+              this.applicantData.pancardpath
+            )
+          }
+          if (this.applicantData.bankDocumentpath) {
+            this.safebankDocumentpathUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
+              this.applicantData.bankDocumentpath
+            )
+          }
+          if (this.applicantData.passportPhotopath) {
+            this.safepassportPhotopathUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
+              this.applicantData.passportPhotopath
+            )
+          }
+          if (this.applicantData.resumeFilepath) {
+            this.safeResumeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
+              this.applicantData.resumeFilepath
+            );
+          }
+        }
+      },
+      (error: any) => {
+        Swal.fire({
+          text: error.message,
+          icon: "error"
+        });
+      }
+    );
+  }
+  onEditApplicant() {
+    this.applicantReq.adharNo = this.verifyEmployeeForm.get('adharNo')?.value;
+    this.applicantReq.panNo = this.verifyEmployeeForm.get('panNo')?.value;
+    this.applicantReq.bankAccountNo = this.verifyEmployeeForm.get('bankAccountNo')?.value;
+    this.applicantReq.bankId = this.verifyEmployeeForm.get('bankId')?.value;
+    this.applicantReq.ifscCode = this.verifyEmployeeForm.get('ifscCode')?.value;
+    this.applicantReq.designationId = this.verifyEmployeeForm.get('designationId')?.value;
+    this.applicantReq.zoneId = this.verifyEmployeeForm.get('zoneId')?.value;
+    this.applicantReq.subdivisionId = this.verifyEmployeeForm.get('subdivisionId')?.value;
+    this.applicantReq.applicantId = this.applicantData.applicantId;
+    this.applicantReq.loginEmail = this.usession.emailAddress;
+    this.applicantservice.UpdateApplicantDetail(this.applicantReq).subscribe(
+      (data) => {
+        if (data.status == 200) {
+          //this.GetSearchDataPhotoSmart();
+          $(this.editothermodal?.nativeElement).modal('hide');
+          Swal.fire({
+            text: 'Employee data saved successfully!',
+            icon: 'success',
+            position: 'top',
+          });
+        }
+      });
+  }
+  OnZoneChange(event: Event): void {
+    const selectElement = event.target as HTMLSelectElement;
+    this.GetSubDivision(selectElement.value);
   }
 }

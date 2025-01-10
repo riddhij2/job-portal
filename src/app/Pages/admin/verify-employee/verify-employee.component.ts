@@ -40,13 +40,9 @@ export class VerifyEmployeeComponent {
   safeadharpathUrl!: SafeResourceUrl;
   isVerificationTriggered: boolean = false;
   usession = new UserSession;
-  applicantId = 0;
 
   constructor(private sanitizer: DomSanitizer, private jobappservice: JobApplicationService, private applicantservice: ApplicantListService,
     private fb: FormBuilder, private router: Router, private jobapplyservice: JobApplyService, private route: ActivatedRoute) {
-    if (this.route.snapshot.params['id'] != null && this.route.snapshot.params['id'] != '' && this.route.snapshot.params['id'] != 'undefined') {
-      this.applicantId = Number(this.route.snapshot.params['id']);
-    }
     this.verifyEmployeeForm = this.fb.group({
       bankId: [0, Validators.required],
       companyId: [0, Validators.required],
@@ -64,10 +60,7 @@ export class VerifyEmployeeComponent {
   }
 
   ngOnInit(): void {
-    if (this.applicantId === 0)
-      this.fetchApplicationData(this.applicantReq);
-    else
-      this.fetchApplicationDataById(this.applicantId);
+    this.fetchApplicationData(this.applicantReq);
     this.GetBankName();
     this.GetCompanyName();
   }
@@ -153,76 +146,7 @@ export class VerifyEmployeeComponent {
       });
     this.isVerificationTriggered = false;
   }
-  fetchApplicationDataById(applicantId: number) {
-    const model = new EmployeeDetail();
-    model.applicantId = applicantId;
-    //this.GetState();
-    this.applicantservice.GetDataApplicantOther(model).subscribe(
-      (data) => {
-        if (data.status == 200 && data.body.length > 0) {
-          this.applicantData = data.body[0];
-          this.GetDesignation(this.applicantData.groupDivisionId);
-          this.GetLocation(this.applicantData.groupDivisionId);
-          this.GetSubDivision(this.applicantData.zoneId.toString());
-          this.verifyEmployeeForm.patchValue({
-            adharNo: this.applicantData.adharNo,
-            panNo: this.applicantData.panNo,
-            bankAccountNo: this.applicantData.bankAccountNo,
-            ifscCode: this.applicantData.ifscCode,
-            bankId: this.applicantData.bankId,
-            companyId: 0,
-            designationId: this.applicantData.designationId,
-            zoneId: this.applicantData.zoneId,
-            subdivisionId: this.applicantData.revenueId,
-            remark: ''
-          });
-
-          if (this.applicantData.qualificationpath) {
-            this.safeQualificationUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
-              this.applicantData.qualificationpath
-            )
-          }
-          if (this.applicantData.adharpath) {
-            this.safeadharpathUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
-              this.applicantData.adharpath
-            )
-          }
-          if (this.applicantData.pancardpath) {
-            this.safepancardpathUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
-              this.applicantData.pancardpath
-            )
-          }
-          if (this.applicantData.bankDocumentpath) {
-            this.safebankDocumentpathUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
-              this.applicantData.bankDocumentpath
-            )
-          }
-          if (this.applicantData.passportPhotopath) {
-            this.safepassportPhotopathUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
-              this.applicantData.passportPhotopath
-            )
-          }
-          if (this.applicantData.resumeFilepath) {
-            this.safeResumeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
-              this.applicantData.resumeFilepath
-            );
-          }
-          if (this.isVerificationTriggered) {
-            Swal.fire({
-              text: 'Employee verified successfully!',
-              icon: 'success'
-            });
-          }
-        }
-      },
-      (error: any) => {
-        Swal.fire({
-          text: error.message,
-          icon: "error"
-        });
-      }
-    );
-  }
+  
   isImage(filePath: string | undefined | null): boolean {
     if (!filePath) {
       return false;
@@ -262,33 +186,7 @@ export class VerifyEmployeeComponent {
         });
       });
   }
-
-  onEditApplicant() {
-    this.applicantReq.adharNo = this.verifyEmployeeForm.get('adharNo')?.value;
-    this.applicantReq.panNo = this.verifyEmployeeForm.get('panNo')?.value;
-    this.applicantReq.bankAccountNo = this.verifyEmployeeForm.get('bankAccountNo')?.value;
-    this.applicantReq.bankId = this.verifyEmployeeForm.get('bankId')?.value;
-    this.applicantReq.ifscCode = this.verifyEmployeeForm.get('ifscCode')?.value;
-    this.applicantReq.designationId = this.verifyEmployeeForm.get('designationId')?.value;
-    this.applicantReq.zoneId = this.verifyEmployeeForm.get('zoneId')?.value;
-    this.applicantReq.subdivisionId = this.verifyEmployeeForm.get('subdivisionId')?.value;
-    this.applicantReq.applicantId = this.applicantData.applicantId;
-    this.applicantReq.loginEmail = this.usession.emailAddress;
-    this.applicantservice.UpdateApplicantDetail(this.applicantReq).subscribe(
-      (data) => {
-        if (data.status == 200) {
-          Swal.fire({
-            text: 'Employee data saved successfully!',
-            icon: 'success',
-            confirmButtonText: 'OK'
-          }).then((result: { isConfirmed: any; }) => {
-            if (result.isConfirmed) {
-              this.router.navigate(['/admin/applicant-list']);
-            }
-          });
-        }
-      });
-  }
+  
   onRejectNext() {
     this.applicantReq.adharNo = this.verifyEmployeeForm.get('adharNo')?.value;
     this.applicantReq.panNo = this.verifyEmployeeForm.get('panNo')?.value;
@@ -303,7 +201,10 @@ export class VerifyEmployeeComponent {
     this.fetchApplicationData(this.applicantReq);
     Swal.fire({
       text: 'Employee rejected successfully!',
-      icon: 'success'
+      icon: 'success',
+      customClass: {
+        popup: 'custom-centered-alert'
+      },
     });
   }
   getFormattedAge(): string {
@@ -328,7 +229,10 @@ export class VerifyEmployeeComponent {
     this.fetchApplicationData(this.applicantReq);
     Swal.fire({
       text: 'Employee verified successfully!',
-      icon: 'success'
+      icon: 'success',
+      customClass: {
+        popup: 'custom-centered-alert'
+      },
     });
   }
   GetLocation(groupId: number) {

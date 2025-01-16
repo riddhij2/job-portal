@@ -1,31 +1,53 @@
 <hr />
 <div class="header">
-  <h3>{{ isEditMode ? 'Update Group Division Master' : 'Add Group Division Master' }}</h3>
+  <h3>{{ isEditMode ? 'Update Designation Master' : 'Add Designation Master' }}</h3>
 </div>
 <br />
 <div class="row justify-content-center">
   <div class="col-md-10">
     <div class="panel panel-primary" data-collapsed="0">
       <div class="panel-body">
-        <form [formGroup]="groupDivisionForm" (ngSubmit)="onSubmit()" class="form-horizontal form-groups-bordered">
+        <form [formGroup]="DesignationForm" (ngSubmit)="onSubmit()" class="form-horizontal form-groups-bordered">
+          <div class="form-group">
+            <label for="field-1" class="col-sm-2 control-label label-large">Division</label>
+            <div class="col-sm-8">
+              <select class="form-control" formControlName="groupDivisionId">
+                <option value="0" selected disabled>Select A Division</option>
+                <option *ngFor="let item of GroupDivisionList" [value]="item.divisionId">{{ item.name }}</option>
+              </select>
+            </div>
+          </div>
           <!-- Name Field -->
           <div class="form-group">
-            <label for="name" class="col-sm-2 control-label label-large">Name</label>
+            <label for="name" class="col-sm-2 control-label label-large">Designation Name</label>
             <div class="col-sm-8">
               <input id="name"
                      type="text"
                      class="form-control"
-                     formControlName="name"
-                     placeholder="Enter group division name"
+                     formControlName="designationName"
+                     placeholder="Enter designation name"
                      (input)="onSearch($event)" />
-              <div *ngIf="groupDivisionForm.get('name')?.invalid && groupDivisionForm.get('name')?.touched" class="text-danger">
-                Name is required.
+              <div *ngIf="DesignationForm.get('designationName')?.invalid && DesignationForm.get('designationName')?.touched" class="text-danger">
+                Designation Name is required.
               </div>
-              <ul *ngIf="groupDivisionSuggestions.length > 0" class="suggestions-list">
-                <li *ngFor="let suggestion of groupDivisionSuggestions">
-                  {{ suggestion.name }} <!-- Display the correct 'name' property -->
+              <ul *ngIf="designationSuggestions.length > 0" class="suggestions-list">
+                <li *ngFor="let suggestion of designationSuggestions">
+                  {{ suggestion.designationName }}
                 </li>
               </ul>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="name" class="col-sm-2 control-label label-large">Designation Code</label>
+            <div class="col-sm-8">
+              <input id="name"
+                     type="text"
+                     class="form-control"
+                     formControlName="designationCode"
+                     placeholder="Enter designation code" />
+              <div *ngIf="DesignationForm.get('designationCode')?.invalid && DesignationForm.get('designationCode')?.touched" class="text-danger">
+                Designation Code is required.
+              </div>
             </div>
           </div>
 
@@ -41,7 +63,7 @@
           </div>
           <div class="form-group">
             <div class="col-sm-offset-5 col-sm-5">
-              <button type="submit" class="btn btn-default label-large" [disabled]="groupDivisionForm.invalid">
+              <button type="submit" class="btn btn-default label-large" [disabled]="DesignationForm.invalid">
                 {{ isEditMode ? 'Update' : 'Add' }}
               </button>
             </div>

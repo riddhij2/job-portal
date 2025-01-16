@@ -16,10 +16,16 @@
                      type="text"
                      class="form-control"
                      formControlName="name"
-                     placeholder="Enter group division name" />
+                     placeholder="Enter group division name"
+                     (input)="onSearch($event)" />
               <div *ngIf="groupDivisionForm.get('name')?.invalid && groupDivisionForm.get('name')?.touched" class="text-danger">
                 Name is required.
               </div>
+              <ul *ngIf="groupDivisionSuggestions.length > 0" class="suggestions-list">
+                <li *ngFor="let suggestion of groupDivisionSuggestions">
+                  {{ suggestion.name }} <!-- Display the correct 'name' property -->
+                </li>
+              </ul>
             </div>
           </div>
 

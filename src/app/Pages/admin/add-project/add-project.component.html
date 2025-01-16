@@ -25,10 +25,16 @@
                      type="text"
                      class="form-control"
                      formControlName="projectName"
-                     placeholder="Enter project name" />
+                     placeholder="Enter project name"
+                     (input)="onSearch($event)"/>
               <div *ngIf="ProjectForm.get('projectName')?.invalid && ProjectForm.get('projectName')?.touched" class="text-danger">
                 Project Name is required.
               </div>
+              <ul *ngIf="projectSuggestions.length > 0" class="suggestions-list">
+                <li *ngFor="let suggestion of projectSuggestions">
+                  {{ suggestion.projectName }} <!-- Display the correct 'name' property -->
+                </li>
+              </ul>
             </div>
           </div>
 

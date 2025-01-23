@@ -6,7 +6,7 @@ import { ActivatedRoute, Router, RouterLink, RouterModule } from '@angular/route
 import { PaginationComponent } from '../../../include/pagination/pagination.component';
 import { Applicationlist, ApplicationlistRequest, EmployeeDetail } from '../../../Models/ApplicationList/applicationlist-request';
 import { HealthDetail, JobApplicationFormRequestIO } from '../../../Models/JobApplication/job-application-form-request';
-import { Bank, DesignationItem, District, LocationItem, ProjectItem, State, SubDivision } from '../../../Models/JobApplication/language-labels';
+import { Bank, DesignationItem, District, EmpStatus, LocationItem, ProjectItem, State, SubDivision } from '../../../Models/JobApplication/language-labels';
 import { UserSession } from '../../../Models/UserSession/user-session';
 import { ApplicantListService } from '../../../Services/ApplicantList/applicant-list.service';
 import { JobApplicationService } from '../../../Services/JobApplication/job-application.service';
@@ -33,6 +33,7 @@ export class ApplicantListComponent {
   ProjectList: ProjectItem[] = [];
   formData = {
     groupDivision: 0,
+    applicantId: 0,
     zone: '',
     designation: '',
     fromDate: '',
@@ -77,6 +78,11 @@ export class ApplicantListComponent {
   banks: Bank[] = [];
   verifyEmployeeForm: FormGroup;
   usession = new UserSession;
+  namesList: ApplicationlistRequest[] = [];
+  empStatusList: EmpStatus[] = [];
+  sortField: string = ''; // Currently sorted field
+  sortDirection: string = 'asc'; 
+
   constructor(private router: Router, private jobapplyservice: JobApplyService, private route: ActivatedRoute, private jobappservice: JobApplicationService,
     private applicantservice: ApplicantListService, private sanitizer: DomSanitizer, private fb: FormBuilder) {
     this.verifyEmployeeForm = this.fb.group({
@@ -228,7 +234,8 @@ export class ApplicantListComponent {
       });
   }
   GetSearchDataPhotoSmart() {
-    this.applicantReq.groupDivisionId = this.formData.groupDivision;
+    this.applicantReq.groupDivisionId = Number(this.formData.groupDivision);
+    this.applicantReq.applicantId = this.formData.applicantId;
     this.applicantReq.statusId = this.statusid;
     this.applicantReq.type = this.type;
     this.applicantReq.zoneId = Number(this.formData.zone);
@@ -263,6 +270,47 @@ export class ApplicantListComponent {
   }
   calculateTotalPages() {
     this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
+  }
+
+  // Method to toggle sorting for any field
+  toggleSort(field: string): void {
+    if (this.sortField === field) {
+      // Toggle the direction if the same field is clicked again
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      // Change the field and reset direction to ascending
+      this.sortField = field;
+      this.sortDirection = 'asc';
+    }
+
+    // Perform sorting
+    this.applicantList.sort((a: any, b: any) => {
+      let valueA = a[field]
+      let valueB = b[field]
+
+      // Handle case-insensitive sorting for strings
+      if (typeof valueA === 'string' && typeof valueB === 'string') {
+        valueA = valueA.toLowerCase();
+        valueB = valueB.toLowerCase();
+      }
+
+      // Handle sorting for numbers and dates
+      if (this.sortDirection === 'asc') {
+        return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+      } else {
+        return valueA > valueB ? -1 : valueA < valueB ? 1 : 0;
+      }
+    });
+
+    // Update the paginated list
+    this.updatePagination();
+  }
+  // Method to return the appropriate icon for a field
+  getSortIcon(field: string): string {
+    if (this.sortField === field) {
+      return this.sortDirection === 'asc' ? 'entypo-up-open' : 'entypo-down-open';
+    }
+    return '';
   }
 
   updatePagination() {
@@ -322,6 +370,7 @@ export class ApplicantListComponent {
     this.jobappservice.getApplicantDetails(this.Applicantmodel).subscribe((data) => {
       if (data.status == 200) {
         this.employeeData = data.body;
+        this.MobileNo = mobileNo;
         if (this.employeeData.stateId)
           this.GetCity(Number(this.employeeData.stateId), 'permanent');
         if (this.employeeData.cStateId)
@@ -342,13 +391,15 @@ export class ApplicantListComponent {
 
   }
   showDetailOther(applicantId: number) {
+    this.applicantData = new ApplicationlistRequest();
     const model = new EmployeeDetail();
     model.applicantId = applicantId;
     this.GetState();
     this.applicantservice.GetDataApplicantOther(model).subscribe(
       (data) => {
-        if (data.status == 200 && data.body.length > 0) {
-          this.applicantData = data.body[0];
+        if (data.status == 200) {
+          this.applicantData = data.body.applicantDetail[0];
+          this.empStatusList = data.body.applicantStatus;
           const bank = this.banks.find(b => b.id === this.applicantData.bankId);
           this.applicantData.bankName = bank ? bank.name : "";
           this.safeQualificationUrl = this.getSafeUrl(this.applicantData.qualificationpath);
@@ -418,12 +469,13 @@ export class ApplicantListComponent {
     $(this.editothermodal?.nativeElement).modal('show');
   }
   fetchApplicationDataById(applicantId: number) {
+    this.applicantData = new ApplicationlistRequest();
     const model = new EmployeeDetail();
     model.applicantId = applicantId;
     this.applicantservice.GetDataApplicantOther(model).subscribe(
       (data) => {
-        if (data.status == 200 && data.body.length > 0) {
-          this.applicantData = data.body[0];
+        if (data.status == 200) {
+          this.applicantData = data.body.applicantDetail[0];
           this.GetDesignation(this.applicantData.groupDivisionId);
           this.GetLocation(this.applicantData.groupDivisionId);
           this.GetSubDivision(this.applicantData.zoneId.toString());
@@ -498,6 +550,9 @@ export class ApplicantListComponent {
             text: 'Employee data saved successfully!',
             icon: 'success',
             position: 'top',
+            customClass: {
+              popup: 'custom-centered-alert'
+            },
           });
         }
       });
@@ -505,5 +560,35 @@ export class ApplicantListComponent {
   OnZoneChange(event: Event): void {
     const selectElement = event.target as HTMLSelectElement;
     this.GetSubDivision(selectElement.value);
+  }
+  SearchByName(name: string) {
+    if (name == '') {
+      this.namesList = [];
+      this.formData.applicantId = 0;
+    }
+    else {
+      const model = new EmployeeDetail();
+      model.groupDivisionId = Number(this.formData.groupDivision);
+      model.name = name;
+      this.applicantservice.SearchByName(model).subscribe(
+        (result: any) => {
+          if (result.status == 200) {
+            this.namesList = result.body;
+          }
+        },
+        (error: any) => {
+          Swal.fire({
+            text: error.message,
+            icon: "error"
+          });
+        });
+    }
+  }
+  onSelectName(model: ApplicationlistRequest) {
+    this.formData.applicantId = model.applicantId;
+    this.formData.searchQuery = model.name + ' - ' + model.designationName;
+    this.namesList = [];
+    this.GetSearchDataPhotoSmart();
+    this.groupid = Number(this.formData.groupDivision)
   }
 }

@@ -22,7 +22,7 @@
                     name="groupDivision"
                     (change)="showOptions(formData.groupDivision)"
                     required>
-              <option value="0" selected>Select Group Division</option>
+              <option value="0" selected>Select Group Division(All)</option>
               <option *ngFor="let item of GroupDivisionList" [value]="item.divisionId">{{ item.name }}</option>
             </select>
           </div>
@@ -32,7 +32,7 @@
                     [(ngModel)]="formData.subDivision"
                     name="subDivision"
                     required>
-              <option value="" selected>Choose Location</option>
+              <option value="" selected>Choose Location(All)</option>
               <option *ngFor="let item of subDivisions" [value]="item.id">{{ item.name }}</option>
             </select>
           </div>
@@ -42,7 +42,7 @@
                     [(ngModel)]="formData.designation"
                     name="designation"
                     required>
-              <option value="" selected>Select Designation</option>
+              <option value="" selected>Select Designation(All)</option>
               <option *ngFor="let designation of DesignationList" [value]="designation.designationId">{{ designation.designationName }}</option>
             </select>
           </div>
@@ -89,7 +89,7 @@
                     name="zone"
                     (change)="GetSubDivision(formData.zone)"
                     required>
-              <option value="" selected>Select Zone</option>
+              <option value="" selected>Select Zone(All)</option>
               <option *ngFor="let item of LocationList" [value]="item.locationId">{{ item.location }}</option>
             </select>
           </div>
@@ -99,7 +99,7 @@
                     [(ngModel)]="formData.status"
                     name="status"
                     required>
-              <option value="" selected>Select Status</option>
+              <option value="" selected>Select Status(All)</option>
               <option *ngFor="let item of StatusList" [value]="item.id">{{ item.name }}</option>
             </select>
           </div>
@@ -109,7 +109,7 @@
                     [(ngModel)]="formData.project"
                     name="project"
                     required>
-              <option value="" selected>Select Project Name</option>
+              <option value="" selected>Select Project Name(All)</option>
               <option *ngFor="let item of ProjectList" [value]="item.projectId">{{ item.projectName }}</option>
             </select>
           </div>
@@ -154,7 +154,13 @@
                    placeholder="Search here..."
                    [(ngModel)]="formData.searchQuery"
                    name="searchQuery"
-                   aria-label="Search" />
+                   aria-label="Search"
+                   (keyup)="SearchByName(formData.searchQuery)" />
+            <ul *ngIf="namesList.length > 0" class="list-group">
+              <li *ngFor="let name of namesList" (click)="onSelectName(name)" class="list-group-item border-0 fs-4" style="cursor:pointer;">
+                {{ name.name}} - {{name.designationName }}
+              </li>
+            </ul>
           </div>
         </div>
       </div>
@@ -167,16 +173,16 @@
             <thead>
               <tr>
                 <th>#</th>
-                <th>Name</th>
-                <th>Gender</th>
-                <th>DOB</th>
-                <th>Age</th>
-                <th>Email Address</th>
-                <th>Mobile No</th>
-                <th>Father Mobile No</th>
-                <th>Revenue Town</th>
-                <th>Designation Name</th>
-                <th>Status</th>
+                <th (click)="toggleSort('name')">Name <i class="entypo" [ngClass]="getSortIcon('name')"></i></th>
+                <th (click)="toggleSort('gender')">Gender <i class="entypo" [ngClass]="getSortIcon('gender')"></i></th>
+                <th (click)="toggleSort('appliedOn')">Applied On <i class="entypo" [ngClass]="getSortIcon('appliedOn')"></i></th>
+                <th (click)="toggleSort('age')">Age <i class="entypo" [ngClass]="getSortIcon('age')"></i></th>
+                <th (click)="toggleSort('emailAddress')">Email Address <i class="entypo" [ngClass]="getSortIcon('emailAddress')"></i></th>
+                <th (click)="toggleSort('mobileNo')">Mobile No <i class="entypo" [ngClass]="getSortIcon('mobileNo')"></i></th>
+                <th (click)="toggleSort('fatherMobileNo')">Father Mobile No <i class="entypo" [ngClass]="getSortIcon('fatherMobileNo')"></i></th>
+                <th (click)="toggleSort('revenueTown')">Revenue Town <i class="entypo" [ngClass]="getSortIcon('revenueTown')"></i></th>
+                <th (click)="toggleSort('designationName')">Designation Name <i class="entypo" [ngClass]="getSortIcon('designationName')"></i></th>
+                <th (click)="toggleSort('statusName')">Status <i class="entypo" [ngClass]="getSortIcon('statusName')"></i></th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -196,19 +202,23 @@
                   </ng-template>
                 </td>
                 <td>{{item.gender}}</td>
-                <td>{{item.dateOfBirth | date:'dd/MM/yyyy'}}</td>
+                <td>{{item.appliedOn | date:'dd/MM/yyyy'}}<br /><span style="color: gray; font-size: x-small;">{{item.appliedOn | date:'HH:mm'}}</span></td>
                 <td>{{item.age}}</td>
                 <td>{{item.emailAddress}}</td>
                 <td>{{item.mobileNo}}</td>
                 <td>{{item.fatherMobileNo}}</td>
                 <td>{{item.revenueTown}}</td>
                 <td>{{item.designationName}}</td>
-                <td [title]="item.statusName+' by '+item.createdBy" style="cursor:pointer">{{item.statusName}}</td>
+                <td [title]="item.statusName === 'Applied' ? item.statusName + ' by ' + item.name + ' | ' + (item.appliedOn | date:'dd/MM/yyyy')
+                    : item.statusName + ' by ' + item.createdBy + ' | ' + (item.createdDate | date:'dd/MM/yyyy')"
+                    style="cursor:pointer">
+                  {{item.statusName}}
+                </td>
                 <td>
-                  <a *ngIf="item.statusName === 'Applied' && item.groupDivisionId === 4" class="btn p-0 fs-4" (click)="showEditModel(item.applicantId)">
+                  <a *ngIf="item.statusName === 'Applied' && (item.groupDivisionId === 4 || item.groupDivisionId === 3)" class="btn p-0 fs-4" (click)="showEditModel(item.applicantId)">
                     <i class="entypo entypo-pencil"></i>
                   </a>
-                  <span class="font-bold fs-4" *ngIf="item.statusName === 'Applied' && item.groupDivisionId === 4">|</span>
+                  <span class="font-bold fs-4" *ngIf="item.statusName === 'Applied' && (item.groupDivisionId === 4 || item.groupDivisionId === 3)">|</span>
                   <ng-container *ngIf="item.groupDivisionId === 1; else defaultTemplate1">
                     <a (click)="showDetail(item.mobileNo)" class="btn p-0 fs-4">
                       <i class="entypo entypo-eye"></i>
@@ -653,6 +663,19 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body fs-4">
+        <div class="mt-4" *ngIf="empStatusList.length>0">
+          <div class="form-container">
+            <div class="row">
+              <div class="col-md-4" *ngFor="let item of empStatusList">
+                <div class="mb-3">
+                  <h5>{{ item.statusName }}</h5>
+                  <p><strong>Date:</strong> {{ item.createdDate }}</p>
+                  <p><strong>{{ item.statusName }} By:</strong> {{ item.actionBy }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="mt-4">
           <div class="form-container">
             <div class="row">
@@ -720,12 +743,7 @@
                     </ng-template>
                   </div>
                 </div>
-                <div class="form-group mb-3 d-block" *ngIf="safeQualificationUrl">
-                  <label for="inputQualification" class="form-label width-180 mt-3">Qualification</label>
-                  <div class="scroll-container" style=" height: 290px">
-                    <embed [src]="safeQualificationUrl" type="application/pdf" width="100%" height="100%" *ngIf="safeQualificationUrl">
-                  </div>
-                </div>
+
               </div>
 
               <div class="col-md-6">
@@ -799,12 +817,19 @@
                       <embed [src]="safepassportPhotopathUrl" type="application/pdf" width="100%" height="350px" *ngIf="safepassportPhotopathUrl">
                     </ng-template>
                   </div>
-
-                  <div class="form-group mb-3 d-block" *ngIf="safeResumeUrl">
-                    <label for="inputResume" class="form-label width-180 mt-2">Resume</label>
-                    <div class="scroll-container" style=" height: 300px">
-                      <embed [src]="safeResumeUrl" type="application/pdf" width="100%" height="100%" *ngIf="safeResumeUrl">
-                    </div>
+                </div>
+              </div>
+              <div class="col-md-12">
+                <div class="form-group mb-3 d-block" *ngIf="safeQualificationUrl">
+                  <label for="inputQualification" class="form-label width-180 mt-3">Qualification</label>
+                  <div class="scroll-container" style=" height: 450px">
+                    <embed [src]="safeQualificationUrl" type="application/pdf" width="100%" height="100%" *ngIf="safeQualificationUrl">
+                  </div>
+                </div>
+                <div class="form-group mb-3 d-block" *ngIf="safeResumeUrl">
+                  <label for="inputResume" class="form-label width-180 mt-2">Resume</label>
+                  <div class="scroll-container" style=" height: 450px">
+                    <embed [src]="safeResumeUrl" type="application/pdf" width="100%" height="100%" *ngIf="safeResumeUrl">
                   </div>
                 </div>
               </div>
@@ -905,12 +930,6 @@
                       </ng-template>
                     </div>
                   </div>
-                  <div class="form-group mb-3 d-block" *ngIf="safeQualificationUrl">
-                    <label for="inputQualification" class="form-label width-180 mt-3">Qualification</label>
-                    <div class="scroll-container" style=" height: 290px">
-                      <embed [src]="safeQualificationUrl" type="application/pdf" width="100%" height="100%">
-                    </div>
-                  </div>
                 </div>
 
                 <div class="col-md-6">
@@ -996,12 +1015,19 @@
                         <embed [src]="safepassportPhotopathUrl" type="application/pdf" width="100%" height="600px" *ngIf="safepassportPhotopathUrl">
                       </ng-template>
                     </div>
-
-                    <div class="form-group mb-3 d-block">
-                      <label for="inputResume" class="form-label width-180 mt-2">Resume</label>
-                      <div class="scroll-container" style="width: 550px; height: 244px">
-                        <embed [src]="safeResumeUrl" type="application/pdf" width="100%" height="100%" *ngIf="safeResumeUrl">
-                      </div>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="form-group mb-3 d-block" *ngIf="safeQualificationUrl">
+                    <label for="inputQualification" class="form-label width-180 mt-3">Qualification</label>
+                    <div class="scroll-container" style=" height: 450px">
+                      <embed [src]="safeQualificationUrl" type="application/pdf" width="100%" height="100%" *ngIf="safeQualificationUrl">
+                    </div>
+                  </div>
+                  <div class="form-group mb-3 d-block" *ngIf="safeResumeUrl">
+                    <label for="inputResume" class="form-label width-180 mt-2">Resume</label>
+                    <div class="scroll-container" style=" height: 450px">
+                      <embed [src]="safeResumeUrl" type="application/pdf" width="100%" height="100%" *ngIf="safeResumeUrl">
                     </div>
                   </div>
                 </div>
